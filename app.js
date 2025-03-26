@@ -5,65 +5,71 @@ const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 const flash = require('connect-flash'); // Flash messages
-const User = require("./apps/models/user"); 
+const { mongoose, connectToDatabase } = require('./apps/database/database');
+const User = require("./apps/models/user");
 var app = express();
 
 require('dotenv').config();
 
-  // Cấu hình LocalStrategy để xác thực bằng email
+// Kết nối với MongoDB Atlas
+connectToDatabase()
+  .then(() => console.log('MongoDB đã kết nối trong app.js'))
+  .catch(err => console.error('Lỗi kết nối MongoDB:', err));
+
+// Cấu hình LocalStrategy để xác thực bằng email
 passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
-   try {
-     // Tìm kiếm người dùng theo email
-     const user = await User.findOne({ email });
-     if (!user) {
-       return done(null, false, { message: "Incorrect email." });
-     }
- 
-     // So sánh mật khẩu với mật khẩu đã băm
-     const isMatch = await bcrypt.compare(password, user.password);
-     if (!isMatch) {
-       return done(null, false, { message: "Incorrect password." });
-     }
- 
-     // Nếu xác thực thành công
-     return done(null, user);
-   } catch (err) {
-     return done(err);
-   }
- }));
- 
+  try {
+    // Tìm kiếm người dùng theo email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return done(null, false, { message: "Incorrect email." });
+    }
 
- app.use(session({
-   secret: 'yourSecretKey',
-   resave: false,
-   saveUninitialized: true
- }));
- 
- app.use(passport.initialize());
- app.use(passport.session());
+    // So sánh mật khẩu với mật khẩu đã băm
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return done(null, false, { message: "Incorrect password." });
+    }
 
-passport.serializeUser(function(user, done) {
-   done(null, user.id);
- });
- 
- passport.deserializeUser(async function(id, done) {
-   try {
-     const user = await User.findById(id);
-     done(null, user);
-   } catch (err) {
-     done(err, null);
-   }
- });
- 
+    // Nếu xác thực thành công
+    return done(null, user);
+  } catch (err) {
+    return done(err);
+  }
+}));
+
+
+app.use(session({
+  secret: 'yourSecretKey',
+  resave: false,
+  saveUninitialized: true
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser(function (user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async function (id, done) {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+});
+
 
 // Middleware để xử lý dữ liệu từ form
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
-   res.locals.user = req.user; // Truyền user vào tất cả các file EJS
-   next();
- });
+  res.locals.user = req.user; // Truyền user vào tất cả các file EJS
+  next();
+});
 
 
 app.use(flash());
@@ -74,7 +80,7 @@ app.use((req, res, next) => {
   next();
 });
 // Routes
-var controller = require(__dirname  + "/apps/controllers");
+var controller = require(__dirname + "/apps/controllers");
 app.use(controller);
 
 var homeAdminController = require(__dirname + "/apps/controllers/admin/homeAdmincontroller");
@@ -87,15 +93,15 @@ var journeyController = require(__dirname + "/apps/controllers/journeycontroller
 app.use(journeyController);
 
 var gateAdminController = require(__dirname + "/apps/controllers/admin/gateAdmincontroller");
-app.use("/admin/gate",  gateAdminController);
+app.use("/admin/gate", gateAdminController);
 
 var gateController = require(__dirname + "/apps/controllers/gatecontroller");
 app.use(gateController);
 
 var stageAdminController = require(__dirname + "/apps/controllers/admin/stageAdmincontroller");
-app.use("/admin/stage",  stageAdminController);
+app.use("/admin/stage", stageAdminController);
 
-var stageController = require(__dirname + "/apps/controllers/stagecontroller"); 
+var stageController = require(__dirname + "/apps/controllers/stagecontroller");
 app.use(stageController);
 
 var grammarAdminController = require(__dirname + "/apps/controllers/admin/grammarAdmincontroller");
@@ -145,6 +151,6 @@ app.set("view engine", "ejs");
 app.use("/static", express.static(__dirname + "/public"));
 
 // Khởi chạy server
-var server = app.listen(3500, function(){
+var server = app.listen(3500, function () {
   console.log("Server is running on port 3500");
 });

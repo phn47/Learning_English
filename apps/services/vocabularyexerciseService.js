@@ -1,15 +1,15 @@
 const { ObjectId } = require('mongodb');
 var config = require("./../config/setting.json");
+const { DatabaseConnection } = require('./../database/database');
 
 class VocabularyExerciseService {
-    databaseConnection = require('./../database/database');
     vocabularyexercises = require('./../models/vocabularyexercise'); // Import model đã tạo
     client;
-    vocabularyExercisesCollection;  
+    vocabularyExercisesCollection;
     vocabularyExercisesDatabase;
 
     constructor() {
-        this.client = this.databaseConnection.getMongoClient();
+        this.client = DatabaseConnection.getMongoClient();
         this.vocabularyExercisesDatabase = this.client.db(config.mongodb.database);
         this.vocabularyExercisesCollection = this.vocabularyExercisesDatabase.collection("vocabularyexercises"); // Tên bảng vocabulary exercises
     }
@@ -20,7 +20,7 @@ class VocabularyExerciseService {
             const cursor = await this.vocabularyExercisesCollection.find({}).skip(skip).limit(limit);
             const vocabularyExercises = await cursor.toArray(); // Chuyển cursor thành mảng
             const totalExercises = await this.vocabularyExercisesCollection.countDocuments(); // Đếm tổng số bài tập
-    
+
             return { vocabularyExercises, totalExercises }; // Trả về dữ liệu
         } catch (error) {
             console.error("Error in getVocabularyExerciseList:", error); // Ghi lỗi vào console

@@ -6,20 +6,41 @@ const gateSchema = new Schema({
         type: String,
         required: true
     },
-    stages: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Stage'
-    }],
+    description: {
+        type: String,
+        default: ''
+    },
     journey: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Journey',
         required: true
     },
-    sortOrder: {
+    order: {
         type: Number,
         default: 0
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    stages: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Stage'
+    }],
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
     }
-}, { timestamps: true });
+});
 
-const Gate = mongoose.model('Gate', gateSchema);
-module.exports = Gate;
+// Middleware cập nhật thời gian khi cập nhật document
+gateSchema.pre('save', function (next) {
+    this.updatedAt = Date.now();
+    next();
+});
+
+module.exports = mongoose.model('Gate', gateSchema);

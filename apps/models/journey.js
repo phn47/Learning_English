@@ -6,15 +6,42 @@ const journeySchema = new Schema({
         type: String,
         required: true
     },
+    description: {
+        type: String,
+        default: ''
+    },
+    level: {
+        type: String,
+        enum: ['beginner', 'intermediate', 'advanced'],
+        default: 'beginner'
+    },
+    order: {
+        type: Number,
+        default: 0
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
     gates: [{
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Gate'
     }],
-    isLocked: {
-        type: Boolean,
-        default: true // By default, all journeys are locked
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
     }
 }, { timestamps: true });
+
+// Middleware cập nhật thời gian khi cập nhật document
+journeySchema.pre('save', function (next) {
+    this.updatedAt = Date.now();
+    next();
+});
 
 const Journey = mongoose.model('Journey', journeySchema);
 module.exports = Journey;

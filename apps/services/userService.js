@@ -1,8 +1,8 @@
 const { ObjectId } = require('mongodb');
 var config = require("./../config/setting.json");
+const { DatabaseConnection } = require('./../database/database');
 
 class UsersService {
-    databaseConnection = require('./../database/database');
     users = require('./../models/user');
 
     client;
@@ -10,13 +10,13 @@ class UsersService {
     usersCollection;
 
     constructor() {
-        this.client = this.databaseConnection.getMongoClient();
+        this.client = DatabaseConnection.getMongoClient();
         this.usersDatabase = this.client.db(config.mongodb.database);
         this.usersCollection = this.usersDatabase.collection("users");
     }
 
     async getUserList(page = 1, limit = 3) {
-        const skip = (page - 1) * limit; 
+        const skip = (page - 1) * limit;
 
 
         const cursor = await this.usersCollection
@@ -24,12 +24,12 @@ class UsersService {
             .skip(skip)
             .limit(limit);
 
-        const users = await cursor.toArray(); 
-        const totalUsers = await this.usersCollection.countDocuments(); 
+        const users = await cursor.toArray();
+        const totalUsers = await this.usersCollection.countDocuments();
 
         return {
-            users,      
-            totalUsers, 
+            users,
+            totalUsers,
         };
     }
 
@@ -40,19 +40,19 @@ class UsersService {
         return await this.usersCollection.findOne({ email });
     }
     async insertUser(user) {
-        user.createdAt = new Date(); 
+        user.createdAt = new Date();
         return await this.usersCollection.insertOne(user);
     }
 
     async updateUser(user) {
-            const { _id, ...updateFields } = user;
+        const { _id, ...updateFields } = user;
 
-            const result = await this.usersCollection.updateOne(
-                { _id: new ObjectId(_id) },
-                { $set: updateFields }
-            );
-            return result;
-    }    
+        const result = await this.usersCollection.updateOne(
+            { _id: new ObjectId(_id) },
+            { $set: updateFields }
+        );
+        return result;
+    }
 
     async deleteUser(id) {
         return await this.usersCollection.deleteOne({ "_id": new ObjectId(id) });

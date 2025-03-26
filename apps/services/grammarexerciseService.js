@@ -1,15 +1,15 @@
 const { ObjectId } = require('mongodb');
 var config = require("./../config/setting.json");
+const { DatabaseConnection } = require('./../database/database');
 
 class GrammarexerciseService {
-    databaseConnection = require('./../database/database');
     grammarexercises = require('./../models/grammarexercise'); // Import model đã tạo
     client;
-    grammarExercisesCollection;  
+    grammarExercisesCollection;
     grammarExercisesDatabase;
 
     constructor() {
-        this.client = this.databaseConnection.getMongoClient();
+        this.client = DatabaseConnection.getMongoClient();
         this.grammarExercisesDatabase = this.client.db(config.mongodb.database);
         this.grammarExercisesCollection = this.grammarExercisesDatabase.collection("grammarexercises"); // Tên bảng grammar exercises
     }
@@ -20,14 +20,14 @@ class GrammarexerciseService {
             const cursor = await this.grammarExercisesCollection.find({}).skip(skip).limit(limit);
             const grammarexercises = await cursor.toArray(); // Chuyển cursor thành mảng
             const totalExercises = await this.grammarExercisesCollection.countDocuments(); // Đếm tổng số bài tập
-    
+
             return { grammarexercises, totalExercises }; // Trả về dữ liệu
         } catch (error) {
             console.error("Error in getGrammarexerciseList:", error); // Ghi lỗi vào console
             throw new Error("Error fetching grammar exercises");
         }
     }
-    
+
 
 
     // Lấy một bài tập ngữ pháp theo ID

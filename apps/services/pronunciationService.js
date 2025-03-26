@@ -1,21 +1,21 @@
 const { ObjectId } = require('mongodb');
 var config = require("./../config/setting.json");
+const { DatabaseConnection } = require('./../database/database');
 
-class PronunciationsService {
-    databaseConnection = require('./../database/database');
+class PronunciationService {
     pronunciations = require('./../models/pronunciation');
-
     client;
-    pronunciationsDatabase;
     pronunciationsCollection;
+    pronunciationsDatabase;
 
     constructor() {
-        this.client = this.databaseConnection.getMongoClient();
+        this.client = DatabaseConnection.getMongoClient();
         this.pronunciationsDatabase = this.client.db(config.mongodb.database);
-        this.pronunciationsCollection = this.pronunciationsDatabase.collection("pronunciations"); // Đảm bảo tên giống trong database
+        this.pronunciationsCollection = this.pronunciationsDatabase.collection("pronunciations");
     }
+
     async getPronunciationList(page = 1, limit = 3) {
-        const skip = (page - 1) * limit; 
+        const skip = (page - 1) * limit;
 
         // Lấy danh sách bài ngữ pháp từ MongoDB
         const cursor = await this.pronunciationsCollection
@@ -23,12 +23,12 @@ class PronunciationsService {
             .skip(skip)
             .limit(limit);
 
-        const pronunciations = await cursor.toArray(); 
+        const pronunciations = await cursor.toArray();
         const totalPronunciations = await this.pronunciationsCollection.countDocuments();
 
         return {
-            pronunciations,     
-            totalPronunciations, 
+            pronunciations,
+            totalPronunciations,
         };
     }
 
@@ -53,4 +53,4 @@ class PronunciationsService {
     }
 }
 
-module.exports = PronunciationsService;
+module.exports = PronunciationService;

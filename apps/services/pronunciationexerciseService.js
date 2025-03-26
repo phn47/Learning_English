@@ -1,15 +1,15 @@
 const { ObjectId } = require('mongodb');
 var config = require("./../config/setting.json");
+const { DatabaseConnection } = require('./../database/database');
 
 class PronunciationexerciseService {
-    databaseConnection = require('./../database/database');
+    pronunciationexercises = require('./../models/pronunciationexercise');
     client;
     pronunciationExercisesCollection;
     pronunciationExercisesDatabase;
-    pronunciationexercises = require('./../models/pronunciationexercise');
 
     constructor() {
-        this.client = this.databaseConnection.getMongoClient();
+        this.client = DatabaseConnection.getMongoClient();
         this.pronunciationExercisesDatabase = this.client.db(config.mongodb.database);
         this.pronunciationExercisesCollection = this.pronunciationExercisesDatabase.collection("pronunciationexercises"); // Tên bảng bài tập phát âm
     }

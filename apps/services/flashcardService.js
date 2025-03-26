@@ -1,44 +1,43 @@
 const { ObjectId } = require('mongodb');
 var config = require("./../config/setting.json");
+const { DatabaseConnection } = require('./../database/database');
 
-class FlashcardsService {
-    databaseConnection = require('./../database/database');
+class FlashcardService {
     flashcards = require('./../models/flashcard');
-    flashcardlists = require('./../models/flashcard_list');
+    flashcardLists = require('./../models/flashcard_list');
     client;
-    flashcardsDatabase;
     flashcardsCollection;
     flashcardListsCollection;
+    database;
 
     constructor() {
-        this.client = this.databaseConnection.getMongoClient();
-        this.flashcardsDatabase = this.client.db(config.mongodb.database);
-        this.flashcardsCollection = this.flashcardsDatabase.collection("flashcards"); // Tên bảng flashcards
-        this.flashcardListsCollection = this.flashcardsDatabase.collection("flashcardlists"); // Tên bảng flashcard lists
+        this.client = DatabaseConnection.getMongoClient();
+        this.database = this.client.db(config.mongodb.database);
+        this.flashcardsCollection = this.database.collection("flashcards");
+        this.flashcardListsCollection = this.database.collection("flashcardlists");
     }
 
+    async getFlashcardList(page = 1, limit = 12) {
+        const skip = (page - 1) * limit;
 
-async getFlashcardList(page = 1, limit = 12) {
-    const skip = (page - 1) * limit;
+        // Fetch the flashcard lists with pagination
+        const cursor = await this.flashcardListsCollection
+            .find({}, {})
+            .skip(skip)
+            .limit(limit);
 
-    // Fetch the flashcard lists with pagination
-    const cursor = await this.flashcardListsCollection
-        .find({}, {})
-        .skip(skip)
-        .limit(limit);
+        const flashcardLists = await cursor.toArray();
+        const totalFlashcardLists = await this.flashcardListsCollection.countDocuments();
 
-    const flashcardLists = await cursor.toArray();
-    const totalFlashcardLists = await this.flashcardListsCollection.countDocuments();
+        for (let list of flashcardLists) {
+            list.wordCount = await this.flashcardsCollection.countDocuments({ flashcardList: list._id.toString() });
+        }
 
-    for (let list of flashcardLists) {
-        list.wordCount = await this.flashcardsCollection.countDocuments({ flashcardList: list._id.toString() });
+        return {
+            flashcardLists,
+            totalFlashcardLists,
+        };
     }
-
-    return {
-        flashcardLists,
-        totalFlashcardLists,
-    };
-}
 
     // Lấy một flashcard list theo ID
     async getFlashcardListById(id) {
@@ -86,4 +85,4 @@ async getFlashcardList(page = 1, limit = 12) {
     }
 }
 
-module.exports = FlashcardsService;
+module.exports = FlashcardService;

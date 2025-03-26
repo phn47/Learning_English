@@ -3,17 +3,27 @@ const Schema = mongoose.Schema;
 
 
 // Định nghĩa Schema cho Blog
-const blogSchema = new mongoose.Schema({
+const blogSchema = new Schema({
     title: {
         type: String,
-        required: true,
-        trim: true
+        required: true
     },
     content: {
         type: String,
         required: true
     },
-    // Bạn có thể thêm ngày tạo và ngày cập nhật tự động
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    tags: [{
+        type: String
+    }],
+    imageUrl: {
+        type: String,
+        default: ''
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -22,6 +32,12 @@ const blogSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
+});
+
+// Middleware cập nhật thời gian khi cập nhật document
+blogSchema.pre('save', function (next) {
+    this.updatedAt = Date.now();
+    next();
 });
 
 // Tạo model Blog từ schema

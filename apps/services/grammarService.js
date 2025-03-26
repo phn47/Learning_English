@@ -1,16 +1,15 @@
 const { ObjectId } = require('mongodb');
 var config = require("./../config/setting.json");
+const { DatabaseConnection } = require('./../database/database');
 
-class GrammarsService {
-    databaseConnection = require('./../database/database');
+class GrammarService {
     grammars = require('./../models/grammar');
-
     client;
-    grammarsDatabase;
     grammarsCollection;
+    grammarsDatabase;
 
     constructor() {
-        this.client = this.databaseConnection.getMongoClient();
+        this.client = DatabaseConnection.getMongoClient();
         this.grammarsDatabase = this.client.db(config.mongodb.database);
         this.grammarsCollection = this.grammarsDatabase.collection("grammars"); // Đảm bảo tên giống trong database
     }
@@ -54,4 +53,4 @@ class GrammarsService {
     }
 }
 
-module.exports = GrammarsService;
+module.exports = GrammarService;

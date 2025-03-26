@@ -1,30 +1,45 @@
-class VocabularyQuestion {
-    question;
-    type; // 'multiple-choice', 'fill-in-the-blank', 'translation'
-    correctAnswer;
-    explanation;
-    options = []; // Chỉ khi loại là multiple-choice mới có options
-}
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-class VocabularyExercise {
-    _id;
-    title;
-    createdAt = new Date(); // Tự động gán ngày tạo
-    questions = []; // Mảng các câu hỏi
-
-
-    addQuestion(question, type, correctAnswer, explanation, options = []) {
-        const newQuestion = new VocabularyQuestion();
-        newQuestion.question = question;
-        newQuestion.type = type;
-        newQuestion.correctAnswer = correctAnswer;
-        newQuestion.explanation = explanation;
-        newQuestion.options = type === 'multiple-choice' ? options : [];
-        this.questions.push(newQuestion);
+const vocabularyExerciseSchema = new Schema({
+    word: {
+        type: String,
+        required: true
+    },
+    meaning: {
+        type: String,
+        required: true
+    },
+    example: {
+        type: String,
+        default: ''
+    },
+    options: [{
+        type: String
+    }],
+    correctAnswer: {
+        type: String,
+        required: true
+    },
+    stage: {
+        type: Schema.Types.ObjectId,
+        ref: 'Stage',
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
     }
-    constructor() {
-        
-    }
-}
+});
 
-module.exports = VocabularyExercise;
+// Middleware cập nhật thời gian khi cập nhật document
+vocabularyExerciseSchema.pre('save', function (next) {
+    this.updatedAt = Date.now();
+    next();
+});
+
+module.exports = mongoose.model('VocabularyExercise', vocabularyExerciseSchema);

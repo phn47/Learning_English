@@ -1,10 +1,11 @@
 {
-    "mongodb":{
-       "username": "adminTai",
-       "password": "Tai12345",
-       "database":"studyenglish_db"
-    },
-    "jwt": {
-    "secret":"goK!pusp6ThEdURUtRenOwUhAsWUCLheBazl!uJLPlS8EbreWLdrupIwabRAsiBu"
+   "mongodb": {
+      "username": "nam",
+      "password": "Nam472003@",
+      "database": "studyenglish_db",
+      "cluster": "nam.n53g3.mongodb.net"
+   },
+   "jwt": {
+      "secret": "goK!pusp6ThEdURUtRenOwUhAsWUCLheBazl!uJLPlS8EbreWLdrupIwabRAsiBu"
    }
- }
+}
