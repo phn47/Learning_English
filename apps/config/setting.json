@@ -1,0 +1,14 @@
+{
+   "mongodb": {
+      "username": "nam",
+      "password": "Nam472003@",
+      "database": "studyenglish_db"
+   },
+   "jwt": {
+      "secret": "goK!pusp6ThEdURUtRenOwUhAsWUCLheBazl!uJLPlS8EbreWLdrupIwabRAsiBu"
+   },
+   "email": {
+      "user": "phamnam1449@gmail.com",
+      "pass": "cytl ddhq jics ovzk"
+   }
+}
