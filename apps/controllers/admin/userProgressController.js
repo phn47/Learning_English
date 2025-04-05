@@ -13,6 +13,11 @@ router.get('/:userId', async (req, res) => {
         res.status(500).json({ success: false, message: 'Lỗi khi lấy tiến trình', error });
     }
 });
+// Route render trang EJS
+router.get('/admin/userprogress', (req, res) => {
+    res.render('admin/userProgress'); // Tự động tìm file views/admin/userProgress.ejs
+});
+
 
 // Bảng xếp hạng
 router.get('/leaderboard/top/:limit?', async (req, res) => {
