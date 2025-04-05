@@ -20,9 +20,11 @@ router.get("/", async (req, res) => {
 router.get("/api/stages", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const limit = 20;
+        console.log("Limit received:", limit); // Debug
 
         const { stages, totalStages } = await stageService.getStageList(page, limit);
+        console.log("Gates returned:", gates.length); // Debug
         const totalPages = Math.ceil(totalStages / limit);
 
         res.json({
@@ -103,7 +105,7 @@ router.post("/update/:id", async (req, res) => {
         if (!currentStage) {
             return res.status(404).json({ error: "Chặng không tìm thấy." });
         }
-        
+
         const oldGateId = currentStage.gate ? currentStage.gate.toString() : null;
         await stageService.updateStage(stageId, { title, questions, gate: new ObjectId(newGateId) });
         if (oldGateId && oldGateId !== newGateId) {

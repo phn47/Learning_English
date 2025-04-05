@@ -13,9 +13,9 @@ class GateService {
         this.gatesDatabase = this.client.db(config.mongodb.database);
         this.gatesCollection = this.gatesDatabase.collection("gates");
     }
-    async getGateList(page = 1, limit = 10) {
+    async getGateList(page = 1, limit = 20) {
         const skip = (page - 1) * limit;
-    
+
         const gates = await this.gatesCollection.aggregate([
             {
                 $lookup: {
@@ -29,9 +29,9 @@ class GateService {
             { $skip: skip },
             { $limit: limit }
         ]).toArray();
-    
+
         const totalGates = await this.gatesCollection.countDocuments();
-    
+
         return { gates, totalGates };
     }
 
@@ -76,6 +76,22 @@ class GateService {
             throw error;
         }
     }
+    // Phương thức lấy cổng cuối cùng theo journeyId
+    async getLastGateByJourney(journeyId) {
+        try {
+            // Tìm cổng cuối cùng của journey với sortOrder giảm dần
+            const lastGate = await this.gatesCollection.find({ journey: new ObjectId(journeyId) })
+                .sort({ sortOrder: -1 })  // Sắp xếp theo sortOrder giảm dần
+                .limit(1)  // Chỉ lấy 1 cổng duy nhất
+                .toArray();
+
+            return lastGate[0];  // Trả về cổng đầu tiên (vì chỉ có 1 cổng được lấy)
+        } catch (error) {
+            console.error("Error in getLastGateByJourney:", error);
+            throw error;  // Ném lỗi để có thể xử lý ở nơi gọi
+        }
+    }
+
 
     async removeStageFromGate(gateId, stageId) {
         try {
