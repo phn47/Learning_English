@@ -87,11 +87,29 @@ app.use(gateController);
 var stageAdminController = require(__dirname + "/apps/controllers/admin/stageAdmincontroller");
 app.use("/admin/stage", stageAdminController);
 
-var userProgressController = require(__dirname + "/apps/controllers/admin/userProgressController");
-app.use("/admin/userprogress", userProgressController);
 
 var stageController = require(__dirname + "/apps/controllers/stagecontroller");
 app.use(stageController);
+
+var userProgressController = require(__dirname + "/apps/controllers/admin/userProgressController");
+app.use("/admin/userprogress", userProgressController);
+
+var ProgressController = require(__dirname + "/apps/controllers/admin/userProgressController");
+app.use(ProgressController);
+
+
+
+
+
+app.get('/admin/chart', (req, res) => {
+  res.render('admin/chart');
+});
+
+
+
+
+
+
 
 var storyAdminController = require(__dirname + "/apps/controllers/admin/storyAdmincontroller");
 app.use("/admin/story", storyAdminController);

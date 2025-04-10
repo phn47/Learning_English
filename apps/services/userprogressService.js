@@ -1,5 +1,7 @@
 const { ObjectId } = require('mongodb');
 var config = require("./../config/setting.json");
+// import './../../models/userprogress';
+
 
 class UserProgressService {
     databaseConnection = require('./../database/database');
@@ -12,6 +14,24 @@ class UserProgressService {
         this.client = this.databaseConnection.getMongoClient();
         this.userprogressDatabase = this.client.db(config.mongodb.database);
         this.userprogressCollection = this.userprogressDatabase.collection("userprogresses");
+    }
+
+    // Lấy tất cả người dùng
+
+    // // Lấy toàn bộ tiến trình
+    // async getAllUserProgress() {
+    //     return await this.userprogresses.find(); // hoặc ORM tương ứng
+    // }
+
+
+    async getAllUserProgress() {
+        try {
+            const userProgressList = await this.userprogressCollection.find().toArray(); // Lấy tất cả tiến trình từ collection
+            return userProgressList;
+        } catch (error) {
+            console.error("Error getting all user progress:", error);
+            throw error; // Đảm bảo lỗi được ném ra để có thể xử lý
+        }
     }
 
     async getLeaderboard(limit = 10) {
@@ -35,7 +55,7 @@ class UserProgressService {
             { $sort: { experiencePoints: -1 } },
             { $limit: limit }
         ]).toArray();
-    }    
+    }
 
     async createUserProgress(userId, journey) {
         const firstGate = journey.gates && journey.gates.length > 0 ? journey.gates[0]._id : null;
@@ -80,7 +100,7 @@ class UserProgressService {
         userProgress.unlockedStages = [...new Set(userProgress.unlockedStages.map(id => id.toString()))].map(id => new ObjectId(id));
         return await this.userprogressCollection.updateOne(
             { user: userProgress.user },
-            { $set: { unlockedGates: userProgress.unlockedGates, unlockedStages: userProgress.unlockedStages,  experiencePoints: userProgress.experiencePoints } },
+            { $set: { unlockedGates: userProgress.unlockedGates, unlockedStages: userProgress.unlockedStages, experiencePoints: userProgress.experiencePoints } },
             { upsert: true }
         );
     }

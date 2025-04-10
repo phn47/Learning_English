@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
     <meta charset="UTF-8" />
@@ -8,50 +8,57 @@
 </head>
 
 <body class="bg-light">
-
     <div class="container py-5">
-        <h2 class="mb-4">📚 Theo dõi tiến trình học</h2>
+        <h2 class="mb-4">📚 Danh sách tiến trình học của học sinh</h2>
 
-        <div class="mb-3">
-            <label for="userId" class="form-label">Nhập ID học sinh:</label>
-            <input type="text" id="userId" class="form-control" placeholder="VD: 65ec29d7..." />
-        </div>
-        <button class="btn btn-primary mb-4" onclick="getProgress()">Xem tiến trình</button>
-
-        <div id="result" class="card p-4 d-none">
-            <h4>Tiến trình hiện tại</h4>
-            <p><strong>Unlocked Gates:</strong> <span id="gates"></span></p>
-            <p><strong>Unlocked Stages:</strong> <span id="stages"></span></p>
-            <p><strong>XP:</strong> <span id="xp"></span></p>
+        <div id="progress-list" class="row g-4">
+            <!-- Danh sách tiến trình sẽ được thêm ở đây -->
         </div>
     </div>
 
     <script>
-        async function getProgress() {
-            const userId = document.getElementById('userId').value;
-            if (!userId) return alert('Vui lòng nhập userId');
-
+        async function fetchAllProgress() {
             try {
-                const res = await fetch(`/api/user-progress/${userId}`);
+                const res = await fetch('http://localhost:3000/admin/userprogress/all');
                 const data = await res.json();
 
-                if (data.success) {
-                    const progress = data.data;
-                    document.getElementById('gates').textContent = progress.unlockedGates?.join(', ') || 'Chưa có';
-                    document.getElementById('stages').textContent = progress.unlockedStages?.join(', ') || 'Chưa có';
-                    document.getElementById('xp').textContent = progress.experiencePoints;
+                if (!data.success) throw new Error('Lỗi từ server: ' + (data.message || 'Không xác định'));
 
-                    document.getElementById('result').classList.remove('d-none');
-                } else {
-                    alert('Không tìm thấy tiến trình.');
-                }
+                const container = document.getElementById('progress-list');
+                container.innerHTML = '';
+
+                data.data.forEach(progress => {
+                    const card = document.createElement('div');
+                    card.className = 'col-md-6 col-lg-4';
+
+                    const username = progress.username || 'Người dùng không xác định';
+                    const journeyName = progress.journeyName || 'Hành trình không xác định';
+                    const gatesNames = (progress.unlockedGatesNames || []).join(', ') || 'Chưa có';
+                    const stagesNames = (progress.unlockedStagesNames || []).join(', ') || 'Chưa có';
+                    const xp = progress.experiencePoints || 0;
+
+                    card.innerHTML = `
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">👤 Tên Người dùng: ${username}</h5>
+                                <p><strong>🚶‍♂️ Hành trình:</strong> ${journeyName}</p>
+                                <p><strong>🔓 Gates đã mở:</strong> ${gatesNames}</p>
+                                <p><strong>🧩 Stages đã mở:</strong> ${stagesNames}</p>
+                                <p><strong>⭐ Điểm kinh nghiệm:</strong> ${xp}</p>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
             } catch (err) {
-                alert('Lỗi khi gọi API');
-                console.error(err);
+                console.error('Lỗi khi tải dữ liệu:', err);
+                alert('Lỗi khi tải dữ liệu tiến trình học: ' + err.message);
             }
         }
-    </script>
 
+        window.onload = fetchAllProgress;
+    </script>
 </body>
 
 </html>

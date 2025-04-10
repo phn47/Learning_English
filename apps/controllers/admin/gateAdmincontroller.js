@@ -22,7 +22,7 @@ router.get("/", async (req, res) => {
 router.get("/api/gate-list", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
+        const limit = 20;
         const { gates, totalGates } = await gateService.getGateList(page, limit);
         const totalPages = Math.ceil(totalGates / limit);
 

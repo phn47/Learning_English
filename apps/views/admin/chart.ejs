@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thống kê tiến trình học của học sinh</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #6c757d;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>📊 Thống kê tiến trình học của học sinh</h2>
+            <button id="reload-btn" class="btn btn-primary">Tải lại</button>
+        </div>
+
+        <div id="spinner" class="spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Biểu đồ cột: Điểm kinh nghiệm -->
+            <div class="col-md-6 chart-container">
+                <h5 class="text-center">Điểm kinh nghiệm của học sinh</h5>
+                <canvas id="xpChart"></canvas>
+            </div>
+
+            <!-- Biểu đồ tròn: Tỷ lệ Gates đã mở -->
+            <div class="col-md-6 chart-container">
+                <h5 class="text-center">Tỷ lệ Gates đã mở</h5>
+                <canvas id="gatesChart"></canvas>
+            </div>
+
+            <!-- Biểu đồ đường: Tiến trình Stages theo thời gian -->
+            <div class="col-md-12 chart-container">
+                <h5 class="text-center">Tiến trình mở Stages theo thời gian</h5>
+                <canvas id="stagesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        async function fetchAllProgress() {
+            const spinner = document.getElementById('spinner');
+            spinner.style.display = 'block';
+
+            try {
+                const res = await fetch('/admin/userprogress/all');
+                const data = await res.json();
+
+                if (!data.success) throw new Error('Lỗi từ server: ' + (data.message || 'Không xác định'));
+
+                spinner.style.display = 'none';
+
+                if (data.data.length === 0) {
+                    document.querySelector('.row').innerHTML = '<p class="no-data">Không có dữ liệu để hiển thị.</p>';
+                    return;
+                }
+
+                // Chuẩn bị dữ liệu cho biểu đồ
+                const usernames = data.data.map(progress => progress.username || 'Không xác định');
+                const xp = data.data.map(progress => progress.experiencePoints || 0);
+                const gatesCount = data.data.map(progress => progress.unlockedGatesNames.length);
+                const totalGates = gatesCount.reduce((a, b) => a + b, 0);
+                const stagesOverTime = data.data.map(progress => ({
+                    date: new Date(progress.createdAt).toLocaleDateString('vi-VN'),
+                    stages: progress.unlockedStagesNames.length
+                }));
+
+                // Biểu đồ cột: Điểm kinh nghiệm
+                new Chart(document.getElementById('xpChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: usernames,
+                        datasets: [{
+                            label: 'Điểm kinh nghiệm',
+                            data: xp,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Điểm' }
+                            }
+                        }
+                    }
+                });
+
+                // Biểu đồ tròn: Tỷ lệ Gates đã mở
+                new Chart(document.getElementById('gatesChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: usernames,
+                        datasets: [{
+                            label: 'Số Gates đã mở',
+                            data: gatesCount,
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+                            ]
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const value = context.raw;
+                                        const percentage = ((value / totalGates) * 100).toFixed(2);
+                                        return `${context.label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Biểu đồ đường: Tiến trình Stages theo thời gian
+                const dates = [...new Set(stagesOverTime.map(item => item.date))];
+                const stagesData = dates.map(date => {
+                    return stagesOverTime.filter(item => item.date === date)
+                        .reduce((sum, item) => sum + item.stages, 0);
+                });
+
+                new Chart(document.getElementById('stagesChart'), {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: 'Số Stages đã mở',
+                            data: stagesData,
+                            fill: false,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Số Stages' }
+                            },
+                            x: {
+                                title: { display: true, text: 'Ngày' }
+                            }
+                        }
+                    }
+                });
+
+            } catch (err) {
+                spinner.style.display = 'none';
+                console.error('Lỗi khi tải dữ liệu:', err);
+                document.querySelector('.row').innerHTML = `<p class="no-data">Lỗi khi tải dữ liệu: ${err.message}</p>`;
+            }
+        }
+
+        // Tải dữ liệu khi trang load
+        window.onload = fetchAllProgress;
+
+        // Thêm sự kiện cho nút tải lại
+        document.getElementById('reload-btn').addEventListener('click', fetchAllProgress);
+    </script>
+</body>
+
+</html>
