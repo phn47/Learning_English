@@ -1,344 +1,243 @@
-<!DOCTYPE html>
-<html lang="vi">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Thống kê tiến trình học của học sinh</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #f8f9fa;
-    }
-
-    .container {
-      padding-top: 20px;
-      padding-bottom: 20px;
-    }
-
-    .chart-container {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-    }
-
-    .spinner {
-      display: none;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .no-data {
-      text-align: center;
-      color: #6c757d;
-      padding: 20px;
-    }
-
-    .table-container {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2>📊 Thống kê tiến trình học của học sinh</h2>
-      <button id="reload-btn" class="btn btn-primary">Tải lại</button>
-    </div>
-
-    <div id="spinner" class="spinner">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Đang tải...</span>
+<div class="sidebar" data-background-color="dark">
+  <div class="sidebar-logo">
+    <div class="logo-header" data-background-color="dark">
+      <a href="/admin" class="logo">
+        <img src="/static/images/logo.png" alt="navbar brand" class="navbar-brand" height="65" />
+      </a>
+      <div class="nav-toggle">
+        <button class="btn btn-toggle toggle-sidebar">
+          <i class="gg-menu-right"></i>
+        </button>
+        <button class="btn btn-toggle sidenav-toggler">
+          <i class="gg-menu-left"></i>
+        </button>
       </div>
-    </div>
-
-    <!-- Bộ lọc -->
-    <div class="mb-4">
-      <div class="row">
-        <div class="col-md-4">
-          <label for="userFilter" class="form-label">Lọc theo học sinh:</label>
-          <select id="userFilter" class="form-select">
-            <option value="all">Tất cả học sinh</option>
-          </select>
-        </div>
-        <div class="col-md-4">
-          <label for="timeFilter" class="form-label">Lọc theo thời gian:</label>
-          <select id="timeFilter" class="form-select">
-            <option value="all">Tất cả thời gian</option>
-            <option value="7">7 ngày qua</option>
-            <option value="30">30 ngày qua</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
-      <!-- Biểu đồ cột: Điểm kinh nghiệm -->
-      <div class="col-md-6 chart-container">
-        <h5 class="text-center">Điểm kinh nghiệm của học sinh</h5>
-        <canvas id="xpChart"></canvas>
-      </div>
-
-      <!-- Biểu đồ tròn: Tỷ lệ Gates đã mở -->
-      <div class="col-md-6 chart-container">
-        <h5 class="text-center">Tỷ lệ Gates đã mở</h5>
-        <canvas id="gatesChart"></canvas>
-      </div>
-
-      <!-- Biểu đồ đường: Tiến trình Stages theo thời gian -->
-      <div class="col-md-12 chart-container">
-        <h5 class="text-center">Tiến trình mở Stages theo thời gian</h5>
-        <canvas id="stagesChart"></canvas>
-      </div>
-
-      <!-- Bảng xếp hạng -->
-      <div class="col-md-6 table-container">
-        <h5 class="text-center">Bảng xếp hạng học sinh</h5>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Xếp hạng</th>
-              <th>Tên học sinh</th>
-              <th>Điểm kinh nghiệm</th>
-            </tr>
-          </thead>
-          <tbody id="leaderboard"></tbody>
-        </table>
-      </div>
-
-      <!-- Bảng chi tiết -->
-      <div class="col-md-6 table-container">
-        <h5 class="text-center">Chi tiết tiến trình</h5>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Tên học sinh</th>
-              <th>Hành trình</th>
-              <th>Gates đã mở</th>
-              <th>Stages đã mở</th>
-              <th>Ngày tạo</th>
-            </tr>
-          </thead>
-          <tbody id="details"></tbody>
-        </table>
-      </div>
+      <button class="topbar-toggler more">
+        <i class="gg-more-vertical-alt"></i>
+      </button>
     </div>
   </div>
+  <div class="sidebar-wrapper scrollbar scrollbar-inner">
+    <div class="sidebar-content">
+      <ul class="nav nav-secondary">
+        <li class="nav-item active">
+          <a href="/admin">
+            <i class="fas fa-home"></i>
+            <p>Trang chủ</p>
+          </a>
+        </li>
+        <li class="nav-section">
+          <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+          <h4 class="text-section">Chức năng</h4>
+        </li>
+        <li class="nav-item">
+          <a data-bs-toggle="collapse" href="#journeyManagement">
+            <i class="fas fa-road"></i>
+            <p>Quản lý hành trình học</p>
+            <span class="caret"></span>
+          </a>
+          <div class="collapse" id="journeyManagement">
+            <ul class="nav nav-collapse">
+              <li>
+                <a href="/admin/journey">
+                  <span class="sub-item">Hành Trình</span>
+                </a>
+              </li>
+              <li>
+                <a href="/admin/gate">
+                  <span class="sub-item">Cổng</span>
+                </a>
+              </li>
+              <li>
+                <a href="/admin/stage">
+                  <span class="sub-item">Chặng Đường</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a data-bs-toggle="collapse" href="#lessonManagement">
+            <i class="fas fa-layer-group"></i>
+            <p>Quản lý bài học</p>
+            <span class="caret"></span>
+          </a>
+          <div class="collapse" id="lessonManagement">
+            <ul class="nav nav-collapse">
+              <li>
+                <a href="/admin/grammar">
+                  <span class="sub-item">Ngữ Pháp</span>
+                </a>
+              </li>
+              <li>
+                <a href="/admin/pronunciation">
+                  <span class="sub-item">Phát Âm</span>
+                </a>
+              </li>
+              <li>
+                <a href="/admin/story">
+                  <span class="sub-item">Câu Chuyện</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a data-bs-toggle="collapse" href="#exerciseManagement">
+            <i class="fas fa-th-list"></i>
+            <p>Quản lý bài luyện tập</p>
+            <span class="caret"></span>
+          </a>
+          <div class="collapse" id="exerciseManagement">
+            <ul class="nav nav-collapse">
+              <li>
+                <a href="/admin/grammar-exercise">
+                  <span class="sub-item">Ngữ Pháp</span>
+                </a>
+              </li>
+              <li>
+                <a href="/admin/pronunciation-exercise">
+                  <span class="sub-item">Phát Âm</span>
+                </a>
+              </li>
+              <li>
+                <a href="/admin/vocabulary-exercise">
+                  <span class="sub-item">Từ Vựng</span>
+                </a>
+              </li>
+              <li>
+                <a href="/admin/dictation-exercise">
+                  <span class="sub-item">Nghe Chép Chính Tả</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a href="/admin/users">
+            <i class="fas fa-user"></i>
+            <p>Quản lý người dùng</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/admin/userprogress">
+            <i class="fas fa-user"></i>
+            <p>Theo dõi tiến trình học tập</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/admin/chart">
+            <i class="far fa-chart-bar"></i>
+            <p>Thống kê</p>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    let allData = []; // Lưu trữ toàn bộ dữ liệu từ API
-    let charts = {}; // Lưu trữ các đối tượng Chart.js để cập nhật
+<div class="main-panel">
+  <div class="main-header">
+    <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+      <div class="container-fluid">
+        <div class="navbar-brand">
+          <a href="index.html" class="logo">
+            <img src="/static/admin/assets/img/kaiadmin/logo_light.svg" alt="navbar brand" class="navbar-brand"
+              height="20" />
+          </a>
+        </div>
+        <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <button type="submit" class="btn btn-search pe-1">
+                <i class="fa fa-search search-icon"></i>
+              </button>
+            </div>
+            <input type="text" placeholder="Search ..." class="form-control" />
+          </div>
+        </nav>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu"
+          aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fa fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMenu">
+          <ul class="navbar-nav ms-auto align-items-center">
+            <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false"
+                aria-haspopup="true">
+                <i class="fa fa-search"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-search animated fadeIn">
+                <form class="navbar-left navbar-form nav-search">
+                  <div class="input-group">
+                    <input type="text" placeholder="Search ..." class="form-control" />
+                  </div>
+                </form>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <i class="fa fa-envelope"></i>
+                <span class="badge badge-danger">3</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="messageDropdown">
+                <li><a class="dropdown-item" href="#">Tin nhắn 1</a></li>
+                <li><a class="dropdown-item" href="#">Tin nhắn 2</a></li>
+                <li><a class="dropdown-item" href="#">Tin nhắn 3</a></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <i class="fa fa-bell"></i>
+                <span class="badge badge-success">4</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifDropdown">
+                <li><a class="dropdown-item" href="#">Thông báo 1</a></li>
+                <li><a class="dropdown-item" href="#">Thông báo 2</a></li>
+                <li><a class="dropdown-item" href="#">Thông báo 3</a></li>
+              </ul>
+            </li>
 
-    async function fetchAllProgress() {
-      const spinner = document.getElementById('spinner');
-      spinner.style.display = 'block';
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <img src="/static/admin/assets/img/profile.jpg" alt="Profile" class="avatar-sm rounded-circle" />
+                <span class="profile-username" id="loginBtn"></span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <li><a class="dropdown-item" href="#">Thông tin cá nhân</a></li>
+                <li><a class="dropdown-item" href="#">Cài đặt</a></li>
+                <li>
+                  <div class="dropdown-divider"></div>
+                </li>
+                <li><a class="dropdown-item" href="#" onclick="handleLogout()">Đăng xuất</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const token = localStorage.getItem("token");
+    const loginBtn = document.getElementById("loginBtn");
 
-      try {
-        const res = await fetch('/admin/userprogress/all');
-        const data = await res.json();
-
-        if (!data.success) throw new Error('Lỗi từ server: ' + (data.message || 'Không xác định'));
-
-        spinner.style.display = 'none';
-
-        if (data.data.length === 0) {
-          document.querySelector('.row').innerHTML = '<p class="no-data">Không có dữ liệu để hiển thị.</p>';
-          return;
-        }
-
-        allData = data.data;
-
-        // Điền danh sách học sinh vào dropdown
-        const userFilter = document.getElementById('userFilter');
-        userFilter.innerHTML = '<option value="all">Tất cả học sinh</option>';
-        allData.forEach(progress => {
-          const option = document.createElement('option');
-          option.value = progress.username || 'Không xác định';
-          option.textContent = progress.username || 'Không xác định';
-          userFilter.appendChild(option);
-        });
-
-        // Hiển thị dữ liệu ban đầu
-        updateChartsAndTables(allData);
-
-      } catch (err) {
-        spinner.style.display = 'none';
-        console.error('Lỗi khi tải dữ liệu:', err);
-        document.querySelector('.row').innerHTML = `<p class="no-data">Lỗi khi tải dữ liệu: ${err.message}</p>`;
-      }
+    if (token) {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const username = payload.username || "User";
+      loginBtn.textContent = username;
+      loginBtn.href = "#";
+      userMenu.style.display = "block";
     }
-
-    function updateChartsAndTables(data) {
-      const usernames = data.map(progress => progress.username || 'Không xác định');
-      const xp = data.map(progress => progress.experiencePoints || 0);
-      const gatesCount = data.map(progress => progress.unlockedGatesNames.length);
-      const totalGates = gatesCount.reduce((a, b) => a + b, 0);
-      const stagesOverTime = data.map(progress => ({
-        date: new Date(progress.createdAt).toLocaleDateString('vi-VN'),
-        stages: progress.unlockedStagesNames.length
-      }));
-
-      // Cập nhật biểu đồ cột: Điểm kinh nghiệm
-      if (charts.xpChart) charts.xpChart.destroy();
-      charts.xpChart = new Chart(document.getElementById('xpChart'), {
-        type: 'bar',
-        data: {
-          labels: usernames,
-          datasets: [{
-            label: 'Điểm kinh nghiệm',
-            data: xp,
-            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: 'Điểm' }
-            }
-          }
-        }
-      });
-
-      // Cập nhật biểu đồ tròn: Tỷ lệ Gates đã mở
-      if (charts.gatesChart) charts.gatesChart.destroy();
-      charts.gatesChart = new Chart(document.getElementById('gatesChart'), {
-        type: 'pie',
-        data: {
-          labels: usernames,
-          datasets: [{
-            label: 'Số Gates đã mở',
-            data: gatesCount,
-            backgroundColor: [
-              '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
-            ]
-          }]
-        },
-        options: {
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  const value = context.raw;
-                  const percentage = ((value / totalGates) * 100).toFixed(2);
-                  return `${context.label}: ${value} (${percentage}%)`;
-                }
-              }
-            }
-          }
-        }
-      });
-
-      // Cập nhật biểu đồ đường: Tiến trình Stages theo thời gian
-      const dates = [...new Set(stagesOverTime.map(item => item.date))];
-      const stagesData = dates.map(date => {
-        return stagesOverTime.filter(item => item.date === date)
-          .reduce((sum, item) => sum + item.stages, 0);
-      });
-
-      if (charts.stagesChart) charts.stagesChart.destroy();
-      charts.stagesChart = new Chart(document.getElementById('stagesChart'), {
-        type: 'line',
-        data: {
-          labels: dates,
-          datasets: [{
-            label: 'Số Stages đã mở',
-            data: stagesData,
-            fill: false,
-            borderColor: 'rgba(75, 192, 192, 1)',
-            tension: 0.1
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: 'Số Stages' }
-            },
-            x: {
-              title: { display: true, text: 'Ngày' }
-            }
-          }
-        }
-      });
-
-      // Cập nhật bảng xếp hạng
-      const leaderboard = document.getElementById('leaderboard');
-      leaderboard.innerHTML = '';
-      const sortedData = [...data].sort((a, b) => (b.experiencePoints || 0) - (a.experiencePoints || 0));
-      sortedData.slice(0, 5).forEach((progress, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${progress.username || 'Không xác định'}</td>
-                    <td>${progress.experiencePoints || 0}</td>
-                `;
-        leaderboard.appendChild(row);
-      });
-
-      // Cập nhật bảng chi tiết
-      const details = document.getElementById('details');
-      details.innerHTML = '';
-      data.forEach(progress => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-                    <td>${progress.username || 'Không xác định'}</td>
-                    <td>${progress.journeyName || 'Hành trình không xác định'}</td>
-                    <td>${progress.unlockedGatesNames.length}</td>
-                    <td>${progress.unlockedStagesNames.length}</td>
-                    <td>${new Date(progress.createdAt).toLocaleDateString('vi-VN')}</td>
-                `;
-        details.appendChild(row);
-      });
+  });
+  function handleLogout() {
+    if (confirm("Bạn có muốn đăng xuất tài khoản không?")) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
     }
-
-    // Lọc dữ liệu theo người dùng và thời gian
-    function filterData() {
-      const userFilter = document.getElementById('userFilter').value;
-      const timeFilter = document.getElementById('timeFilter').value;
-      let filteredData = [...allData];
-
-      // Lọc theo người dùng
-      if (userFilter !== 'all') {
-        filteredData = filteredData.filter(progress =>
-          (progress.username || 'Không xác định') === userFilter
-        );
-      }
-
-      // Lọc theo thời gian
-      const now = new Date();
-      if (timeFilter !== 'all') {
-        const days = parseInt(timeFilter);
-        const cutoffDate = new Date(now.setDate(now.getDate() - days));
-        filteredData = filteredData.filter(progress =>
-          new Date(progress.createdAt) >= cutoffDate
-        );
-      }
-
-      updateChartsAndTables(filteredData);
-    }
-
-    // Tải dữ liệu khi trang load
-    window.onload = fetchAllProgress;
-
-    // Thêm sự kiện cho nút tải lại
-    document.getElementById('reload-btn').addEventListener('click', fetchAllProgress);
-
-    // Thêm sự kiện cho bộ lọc
-    document.getElementById('userFilter').addEventListener('change', filterData);
-    document.getElementById('timeFilter').addEventListener('change', filterData);
-  </script>
-</body>
-
-</html>
+  }
+</script>

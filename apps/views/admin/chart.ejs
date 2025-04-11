@@ -35,6 +35,14 @@
             color: #6c757d;
             padding: 20px;
         }
+
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 
@@ -48,6 +56,26 @@
         <div id="spinner" class="spinner">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Đang tải...</span>
+            </div>
+        </div>
+
+        <!-- Bộ lọc -->
+        <div class="mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="userFilter" class="form-label">Lọc theo học sinh:</label>
+                    <select id="userFilter" class="form-select">
+                        <option value="all">Tất cả học sinh</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="timeFilter" class="form-label">Lọc theo thời gian:</label>
+                    <select id="timeFilter" class="form-select">
+                        <option value="all">Tất cả thời gian</option>
+                        <option value="7">7 ngày qua</option>
+                        <option value="30">30 ngày qua</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -69,12 +97,47 @@
                 <h5 class="text-center">Tiến trình mở Stages theo thời gian</h5>
                 <canvas id="stagesChart"></canvas>
             </div>
+
+            <!-- Bảng xếp hạng -->
+            <div class="col-md-6 table-container">
+                <h5 class="text-center">Bảng xếp hạng học sinh</h5>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Xếp hạng</th>
+                            <th>Tên học sinh</th>
+                            <th>Điểm kinh nghiệm</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard"></tbody>
+                </table>
+            </div>
+
+            <!-- Bảng chi tiết -->
+            <div class="col-md-6 table-container">
+                <h5 class="text-center">Chi tiết tiến trình</h5>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Tên học sinh</th>
+                            <th>Hành trình</th>
+                            <th>Gates đã mở</th>
+                            <th>Stages đã mở</th>
+                            <th>Ngày tạo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="details"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        let allData = []; // Lưu trữ toàn bộ dữ liệu từ API
+        let charts = {}; // Lưu trữ các đối tượng Chart.js để cập nhật
+
         async function fetchAllProgress() {
             const spinner = document.getElementById('spinner');
             spinner.style.display = 'block';
@@ -92,98 +155,20 @@
                     return;
                 }
 
-                // Chuẩn bị dữ liệu cho biểu đồ
-                const usernames = data.data.map(progress => progress.username || 'Không xác định');
-                const xp = data.data.map(progress => progress.experiencePoints || 0);
-                const gatesCount = data.data.map(progress => progress.unlockedGatesNames.length);
-                const totalGates = gatesCount.reduce((a, b) => a + b, 0);
-                const stagesOverTime = data.data.map(progress => ({
-                    date: new Date(progress.createdAt).toLocaleDateString('vi-VN'),
-                    stages: progress.unlockedStagesNames.length
-                }));
+                allData = data.data;
 
-                // Biểu đồ cột: Điểm kinh nghiệm
-                new Chart(document.getElementById('xpChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: usernames,
-                        datasets: [{
-                            label: 'Điểm kinh nghiệm',
-                            data: xp,
-                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: { display: true, text: 'Điểm' }
-                            }
-                        }
-                    }
+                // Điền danh sách học sinh vào dropdown
+                const userFilter = document.getElementById('userFilter');
+                userFilter.innerHTML = '<option value="all">Tất cả học sinh</option>';
+                allData.forEach(progress => {
+                    const option = document.createElement('option');
+                    option.value = progress.username || 'Không xác định';
+                    option.textContent = progress.username || 'Không xác định';
+                    userFilter.appendChild(option);
                 });
 
-                // Biểu đồ tròn: Tỷ lệ Gates đã mở
-                new Chart(document.getElementById('gatesChart'), {
-                    type: 'pie',
-                    data: {
-                        labels: usernames,
-                        datasets: [{
-                            label: 'Số Gates đã mở',
-                            data: gatesCount,
-                            backgroundColor: [
-                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
-                            ]
-                        }]
-                    },
-                    options: {
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        const value = context.raw;
-                                        const percentage = ((value / totalGates) * 100).toFixed(2);
-                                        return `${context.label}: ${value} (${percentage}%)`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-
-                // Biểu đồ đường: Tiến trình Stages theo thời gian
-                const dates = [...new Set(stagesOverTime.map(item => item.date))];
-                const stagesData = dates.map(date => {
-                    return stagesOverTime.filter(item => item.date === date)
-                        .reduce((sum, item) => sum + item.stages, 0);
-                });
-
-                new Chart(document.getElementById('stagesChart'), {
-                    type: 'line',
-                    data: {
-                        labels: dates,
-                        datasets: [{
-                            label: 'Số Stages đã mở',
-                            data: stagesData,
-                            fill: false,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            tension: 0.1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: { display: true, text: 'Số Stages' }
-                            },
-                            x: {
-                                title: { display: true, text: 'Ngày' }
-                            }
-                        }
-                    }
-                });
+                // Hiển thị dữ liệu ban đầu
+                updateChartsAndTables(allData);
 
             } catch (err) {
                 spinner.style.display = 'none';
@@ -192,11 +177,167 @@
             }
         }
 
+        function updateChartsAndTables(data) {
+            const usernames = data.map(progress => progress.username || 'Không xác định');
+            const xp = data.map(progress => progress.experiencePoints || 0);
+            const gatesCount = data.map(progress => progress.unlockedGatesNames.length);
+            const totalGates = gatesCount.reduce((a, b) => a + b, 0);
+            const stagesOverTime = data.map(progress => ({
+                date: new Date(progress.createdAt).toLocaleDateString('vi-VN'),
+                stages: progress.unlockedStagesNames.length
+            }));
+
+            // Cập nhật biểu đồ cột: Điểm kinh nghiệm
+            if (charts.xpChart) charts.xpChart.destroy();
+            charts.xpChart = new Chart(document.getElementById('xpChart'), {
+                type: 'bar',
+                data: {
+                    labels: usernames,
+                    datasets: [{
+                        label: 'Điểm kinh nghiệm',
+                        data: xp,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Điểm' }
+                        }
+                    }
+                }
+            });
+
+            // Cập nhật biểu đồ tròn: Tỷ lệ Gates đã mở
+            if (charts.gatesChart) charts.gatesChart.destroy();
+            charts.gatesChart = new Chart(document.getElementById('gatesChart'), {
+                type: 'pie',
+                data: {
+                    labels: usernames,
+                    datasets: [{
+                        label: 'Số Gates đã mở',
+                        data: gatesCount,
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+                        ]
+                    }]
+                },
+                options: {
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const value = context.raw;
+                                    const percentage = ((value / totalGates) * 100).toFixed(2);
+                                    return `${context.label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Cập nhật biểu đồ đường: Tiến trình Stages theo thời gian
+            const dates = [...new Set(stagesOverTime.map(item => item.date))];
+            const stagesData = dates.map(date => {
+                return stagesOverTime.filter(item => item.date === date)
+                    .reduce((sum, item) => sum + item.stages, 0);
+            });
+
+            if (charts.stagesChart) charts.stagesChart.destroy();
+            charts.stagesChart = new Chart(document.getElementById('stagesChart'), {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Số Stages đã mở',
+                        data: stagesData,
+                        fill: false,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Số Stages' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Ngày' }
+                        }
+                    }
+                }
+            });
+
+            // Cập nhật bảng xếp hạng
+            const leaderboard = document.getElementById('leaderboard');
+            leaderboard.innerHTML = '';
+            const sortedData = [...data].sort((a, b) => (b.experiencePoints || 0) - (a.experiencePoints || 0));
+            sortedData.slice(0, 5).forEach((progress, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${progress.username || 'Không xác định'}</td>
+                    <td>${progress.experiencePoints || 0}</td>
+                `;
+                leaderboard.appendChild(row);
+            });
+
+            // Cập nhật bảng chi tiết
+            const details = document.getElementById('details');
+            details.innerHTML = '';
+            data.forEach(progress => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${progress.username || 'Không xác định'}</td>
+                    <td>${progress.journeyName || 'Hành trình không xác định'}</td>
+                    <td>${progress.unlockedGatesNames.length}</td>
+                    <td>${progress.unlockedStagesNames.length}</td>
+                    <td>${new Date(progress.createdAt).toLocaleDateString('vi-VN')}</td>
+                `;
+                details.appendChild(row);
+            });
+        }
+
+        // Lọc dữ liệu theo người dùng và thời gian
+        function filterData() {
+            const userFilter = document.getElementById('userFilter').value;
+            const timeFilter = document.getElementById('timeFilter').value;
+            let filteredData = [...allData];
+
+            // Lọc theo người dùng
+            if (userFilter !== 'all') {
+                filteredData = filteredData.filter(progress =>
+                    (progress.username || 'Không xác định') === userFilter
+                );
+            }
+
+            // Lọc theo thời gian
+            const now = new Date();
+            if (timeFilter !== 'all') {
+                const days = parseInt(timeFilter);
+                const cutoffDate = new Date(now.setDate(now.getDate() - days));
+                filteredData = filteredData.filter(progress =>
+                    new Date(progress.createdAt) >= cutoffDate
+                );
+            }
+
+            updateChartsAndTables(filteredData);
+        }
+
         // Tải dữ liệu khi trang load
         window.onload = fetchAllProgress;
 
         // Thêm sự kiện cho nút tải lại
         document.getElementById('reload-btn').addEventListener('click', fetchAllProgress);
+
+        // Thêm sự kiện cho bộ lọc
+        document.getElementById('userFilter').addEventListener('change', filterData);
+        document.getElementById('timeFilter').addEventListener('change', filterData);
     </script>
 </body>
 
