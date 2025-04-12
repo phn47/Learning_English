@@ -13,9 +13,65 @@ class JourneyService {
         this.client = this.databaseConnection.getMongoClient();
         this.journeysDatabase = this.client.db(config.mongodb.database);
         this.journeysCollection = this.journeysDatabase.collection("journeys");
+        // this.journeysCollection = this.journeysDatabase.collection("journeys");
+        this.gatesCollection = this.journeysDatabase.collection("gates"); // Thêm collection cho gates
+        this.stagesCollection = this.journeysDatabase.collection("stages"); // Thêm collection cho stages
+        this.usersCollection = this.journeysDatabase.collection("users");
+    }
+    async getAllJourneys() {
+        try {
+            const journeys = await this.journeysCollection.find().toArray();
+            console.log("Dữ liệu journeys từ cơ sở dữ liệu:", journeys);
+            return journeys.map(journey => ({
+                _id: journey._id.toString(),
+                title: journey.title || 'Hành trình không xác định'
+            }));
+        } catch (err) {
+            console.error("Lỗi khi lấy journeys:", err);
+            return [];
+        }
+    }
+
+    async getAllGates() {
+        try {
+            const gates = await this.gatesCollection.find().toArray();
+            return gates.map(gate => ({
+                _id: gate._id.toString(),
+                title: gate.title || 'Gate không xác định'
+            }));
+        } catch (err) {
+            console.error("Lỗi khi lấy gates:", err);
+            return [];
+        }
+    }
+    async getUserById(userId) {
+        try {
+            const user = await this.usersCollection.findOne({ _id: new ObjectId(userId) });
+            return user ? {
+                _id: user._id.toString(),
+                username: user.username || 'Người dùng không xác định'
+            } : null;
+        } catch (err) {
+            console.error("Lỗi khi lấy thông tin người dùng:", err);
+            return null;
+        }
+    }
+
+    async getAllStages() {
+        try {
+            const stages = await this.stagesCollection.find().toArray();
+            return stages.map(stage => ({
+                _id: stage._id.toString(),
+                title: stage.title || 'Stage không xác định'
+            }));
+        } catch (err) {
+            console.error("Lỗi khi lấy stages:", err);
+            return [];
+        }
     }
 
     async getJourneyList(page = 1, limit = 50) {
+
         const skip = (page - 1) * limit;
 
         const cursor = await this.journeysCollection

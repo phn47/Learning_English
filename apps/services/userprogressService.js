@@ -1,5 +1,7 @@
 const { ObjectId } = require('mongodb');
 var config = require("./../config/setting.json");
+// import './../../models/userprogress';
+
 
 class UserProgressService {
     databaseConnection = require('./../database/database');
@@ -12,6 +14,24 @@ class UserProgressService {
         this.client = this.databaseConnection.getMongoClient();
         this.userprogressDatabase = this.client.db(config.mongodb.database);
         this.userprogressCollection = this.userprogressDatabase.collection("userprogresses");
+    }
+
+    // Lấy tất cả người dùng
+
+    // // Lấy toàn bộ tiến trình
+    // async getAllUserProgress() {
+    //     return await this.userprogresses.find(); // hoặc ORM tương ứng
+    // }
+
+
+    async getAllUserProgress() {
+        try {
+            const userProgressList = await this.userprogressCollection.find().toArray(); // Lấy tất cả tiến trình từ collection
+            return userProgressList;
+        } catch (error) {
+            console.error("Error getting all user progress:", error);
+            throw error; // Đảm bảo lỗi được ném ra để có thể xử lý
+        }
     }
 
     async getLeaderboard(limit = 10) {

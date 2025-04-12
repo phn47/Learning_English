@@ -22,7 +22,7 @@ router.get("/", async (req, res) => {
 router.get("/api/gate-list", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const limit = 20;
         const { gates, totalGates } = await gateService.getGateList(page, limit);
         const totalPages = Math.ceil(totalGates / limit);
 
@@ -39,14 +39,24 @@ router.get("/api/gate-list", async (req, res) => {
 });
 
 router.post("/add", async (req, res) => {
-    const { title, journeyId } = req.body;
+    const { title, journeyId, description } = req.body;
     try {
+        // Lấy số lượng cổng hiện tại để xác định giá trị sortOrder tiếp theo
+        const lastGate = await gateService.getLastGateByJourney(journeyId); // Hàm lấy cổng cuối cùng theo journey
+        const newSortOrder = lastGate ? lastGate.sortOrder + 1 : 1; // Tăng giá trị sortOrder tự động
+
+        // Tạo cổng mới
         const newGate = await gateService.insertGate({
             title,
+            description,
             journey: new ObjectId(journeyId),
             stages: [],
-            createdAt: new Date()
+            sortOrder: newSortOrder, // Thêm sortOrder tự động
+            createdAt: new Date(),
+            updatedAt: new Date()  // Gán updatedAt tại thời điểm tạo
         });
+
+        // Thêm cổng vào journey
         await journeyService.addGateToJourney(journeyId, newGate.insertedId);
 
         res.status(200).json({ message: "Cổng đã được thêm thành công !", gate: newGate });
@@ -55,6 +65,7 @@ router.post("/add", async (req, res) => {
         res.status(500).json({ error: "Failed to add Gate." });
     }
 });
+
 
 router.post("/update/:id", async (req, res) => {
     const gateId = req.params.id;

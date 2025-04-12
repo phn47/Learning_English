@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Tiến trình học của học sinh</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+    <div class="container py-5">
+        <h2 class="mb-4">📚 Danh sách tiến trình học của học sinh</h2>
+
+        <div id="progress-list" class="row g-4">
+            <!-- Danh sách tiến trình sẽ được thêm ở đây -->
+        </div>
+    </div>
+
+    <script>
+        async function fetchAllProgress() {
+            try {
+                const res = await fetch('http://localhost:3000/admin/userprogress/all');
+                const data = await res.json();
+
+                if (!data.success) throw new Error('Lỗi từ server: ' + (data.message || 'Không xác định'));
+
+                const container = document.getElementById('progress-list');
+                container.innerHTML = '';
+
+                data.data.forEach(progress => {
+                    const card = document.createElement('div');
+                    card.className = 'col-md-6 col-lg-4';
+
+                    const username = progress.username || 'Người dùng không xác định';
+                    const journeyName = progress.journeyName || 'Hành trình không xác định';
+                    const gatesNames = (progress.unlockedGatesNames || []).join(', ') || 'Chưa có';
+                    const stagesNames = (progress.unlockedStagesNames || []).join(', ') || 'Chưa có';
+                    const xp = progress.experiencePoints || 0;
+
+                    card.innerHTML = `
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">👤 Tên Người dùng: ${username}</h5>
+                                <p><strong>🚶‍♂️ Hành trình:</strong> ${journeyName}</p>
+                                <p><strong>🔓 Gates đã mở:</strong> ${gatesNames}</p>
+                                <p><strong>🧩 Stages đã mở:</strong> ${stagesNames}</p>
+                                <p><strong>⭐ Điểm kinh nghiệm:</strong> ${xp}</p>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error('Lỗi khi tải dữ liệu:', err);
+                alert('Lỗi khi tải dữ liệu tiến trình học: ' + err.message);
+            }
+        }
+
+        window.onload = fetchAllProgress;
+    </script>
+</body>
+
+</html>
