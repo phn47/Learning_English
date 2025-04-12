@@ -13,7 +13,7 @@ class StageService {
         this.stagesCollection = this.stagesDatabase.collection("stages");
     }
 
-    async getStageList(page = 1, limit = 10) {
+    async getStageList(page = 1, limit = 50) {
         const skip = (page - 1) * limit;
 
         const stages = await this.stagesCollection.aggregate([

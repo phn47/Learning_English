@@ -15,7 +15,7 @@ class JourneyService {
         this.journeysCollection = this.journeysDatabase.collection("journeys");
     }
 
-    async getJourneyList(page = 1, limit = 10) {
+    async getJourneyList(page = 1, limit = 50) {
         const skip = (page - 1) * limit;
 
         const cursor = await this.journeysCollection
@@ -64,7 +64,7 @@ class JourneyService {
                 }
             }
         ]).toArray();
-    }    
+    }
 
     async getJourneyWithDetails(journeyId) {
         try {
@@ -101,7 +101,7 @@ class JourneyService {
             console.error("Error fetching journey details:", error);
             throw error;
         }
-    }        
+    }
 
     async getJourney(id) {
         return await this.journeysCollection.findOne({ _id: new ObjectId(id) });

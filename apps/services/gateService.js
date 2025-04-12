@@ -13,9 +13,9 @@ class GateService {
         this.gatesDatabase = this.client.db(config.mongodb.database);
         this.gatesCollection = this.gatesDatabase.collection("gates");
     }
-    async getGateList(page = 1, limit = 10) {
+    async getGateList(page = 1, limit = 50) {
         const skip = (page - 1) * limit;
-    
+
         const gates = await this.gatesCollection.aggregate([
             {
                 $lookup: {
@@ -29,9 +29,9 @@ class GateService {
             { $skip: skip },
             { $limit: limit }
         ]).toArray();
-    
+
         const totalGates = await this.gatesCollection.countDocuments();
-    
+
         return { gates, totalGates };
     }
 

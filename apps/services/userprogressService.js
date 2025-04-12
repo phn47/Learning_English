@@ -35,7 +35,7 @@ class UserProgressService {
             { $sort: { experiencePoints: -1 } },
             { $limit: limit }
         ]).toArray();
-    }    
+    }
 
     async createUserProgress(userId, journey) {
         const firstGate = journey.gates && journey.gates.length > 0 ? journey.gates[0]._id : null;
@@ -80,7 +80,7 @@ class UserProgressService {
         userProgress.unlockedStages = [...new Set(userProgress.unlockedStages.map(id => id.toString()))].map(id => new ObjectId(id));
         return await this.userprogressCollection.updateOne(
             { user: userProgress.user },
-            { $set: { unlockedGates: userProgress.unlockedGates, unlockedStages: userProgress.unlockedStages,  experiencePoints: userProgress.experiencePoints } },
+            { $set: { unlockedGates: userProgress.unlockedGates, unlockedStages: userProgress.unlockedStages, experiencePoints: userProgress.experiencePoints } },
             { upsert: true }
         );
     }

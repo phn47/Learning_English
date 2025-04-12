@@ -138,41 +138,44 @@
 
 <div class="main-panel">
   <div class="main-header">
-      <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
-          <div class="container-fluid">
-              <div class="navbar-brand">
-                  <a href="index.html" class="logo">
-                      <img src="/static/admin/assets/img/kaiadmin/logo_light.svg" alt="navbar brand" class="navbar-brand" height="20" />
-                  </a>
-              </div>
-              <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <button type="submit" class="btn btn-search pe-1">
-                      <i class="fa fa-search search-icon"></i>
-                    </button>
-                  </div>
-                  <input type="text" placeholder="Search ..." class="form-control" />
-                </div>
-              </nav>
-              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
-                  <i class="fa fa-bars"></i>
+    <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+      <div class="container-fluid">
+        <div class="navbar-brand">
+          <a href="index.html" class="logo">
+            <img src="/static/admin/assets/img/kaiadmin/logo_light.svg" alt="navbar brand" class="navbar-brand"
+              height="20" />
+          </a>
+        </div>
+        <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <button type="submit" class="btn btn-search pe-1">
+                <i class="fa fa-search search-icon"></i>
               </button>
-              <div class="collapse navbar-collapse" id="navbarMenu">
-                  <ul class="navbar-nav ms-auto align-items-center">
-                      <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
-                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false" aria-haspopup="true">
-                          <i class="fa fa-search"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-search animated fadeIn">
-                          <form class="navbar-left navbar-form nav-search">
-                            <div class="input-group">
-                              <input type="text" placeholder="Search ..." class="form-control" />
-                            </div>
-                          </form>
-                        </ul>
-                      </li>
-                      <li class="nav-item dropdown">
+            </div>
+            <input type="text" placeholder="Search ..." class="form-control" />
+          </div>
+        </nav>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu"
+          aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fa fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMenu">
+          <ul class="navbar-nav ms-auto align-items-center">
+            <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false"
+                aria-haspopup="true">
+                <i class="fa fa-search"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-search animated fadeIn">
+                <form class="navbar-left navbar-form nav-search">
+                  <div class="input-group">
+                    <input type="text" placeholder="Search ..." class="form-control" />
+                  </div>
+                </form>
+              </ul>
+            </li>
+            <!-- <li class="nav-item dropdown">
                           <a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                               <i class="fa fa-envelope"></i>
                               <span class="badge badge-danger">3</span>
@@ -193,43 +196,46 @@
                               <li><a class="dropdown-item" href="#">Thông báo 2</a></li>
                               <li><a class="dropdown-item" href="#">Thông báo 3</a></li>
                           </ul>
-                      </li>
+                      </li> -->
 
-                      <li class="nav-item dropdown">
-                          <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                              <img src="/static/admin/assets/img/profile.jpg" alt="Profile" class="avatar-sm rounded-circle" />
-                              <span class="profile-username" id="loginBtn"></span>
-                          </a>
-                          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                              <li><a class="dropdown-item" href="#">Thông tin cá nhân</a></li>
-                              <li><a class="dropdown-item" href="#">Cài đặt</a></li>
-                              <li><div class="dropdown-divider"></div></li>
-                              <li><a class="dropdown-item" href="#" onclick="handleLogout()">Đăng xuất</a></li>
-                          </ul>
-                      </li>
-                  </ul>
-              </div>
-          </div>
-      </nav>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <img src="/static/admin/assets/img/profile.jpg" alt="Profile" class="avatar-sm rounded-circle" />
+                <span class="profile-username" id="loginBtn"></span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <li><a class="dropdown-item" href="#">Thông tin cá nhân</a></li>
+                <!-- <li><a class="dropdown-item" href="#">Cài đặt</a></li> -->
+                <li>
+                  <div class="dropdown-divider"></div>
+                </li>
+                <li><a class="dropdown-item" href="#" onclick="handleLogout()">Đăng xuất</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
   </div>
 </div>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-        const token = localStorage.getItem("token");
-        const loginBtn = document.getElementById("loginBtn");
+    const token = localStorage.getItem("token");
+    const loginBtn = document.getElementById("loginBtn");
 
-        if (token) {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const username = payload.username || "User";
-            loginBtn.textContent = username;
-            loginBtn.href = "#";
-            userMenu.style.display = "block";
-        }
-    });
+    if (token) {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const username = payload.username || "User";
+      loginBtn.textContent = username;
+      loginBtn.href = "#";
+      userMenu.style.display = "block";
+    }
+  });
   function handleLogout() {
     if (confirm("Bạn có muốn đăng xuất tài khoản không?")) {
-            localStorage.removeItem("token");
-            window.location.href = "/login";
-    } 
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
   }
 </script>

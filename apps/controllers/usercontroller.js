@@ -24,35 +24,35 @@ router.post("/register", async (req, res) => {
   const { username, email, password, confirmPassword, role = "user" } = req.body;
 
   if (password !== confirmPassword) {
-      return res.status(400).json({ message: "Passwords do not match." });
+    return res.status(400).json({ message: "Passwords do not match." });
   }
   try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const user = { username, email, password: hashedPassword, role, active: true };
-      await userService.insertUser(user);
-      res.status(201).json({ message: "User registered successfully" });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = { username, email, password: hashedPassword, role, active: true };
+    await userService.insertUser(user);
+    res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-      res.status(500).json({ message: "Registration error", error });
+    res.status(500).json({ message: "Registration error", error });
   }
 });
 
 router.post("/login", async (req, res) => {
   try {
-      const user = await userService.getUserByEmail(req.body.email);
-      if (!user) 
-        return res.status(403).json({ message: "Email đăng nhập hoặc mật khẩu không đúng !!" });
+    const user = await userService.getUserByEmail(req.body.email);
+    if (!user)
+      return res.status(403).json({ message: "Email đăng nhập hoặc mật khẩu không đúng !!" });
 
-      const passwordIsValid = await bcrypt.compare(req.body.password, user.password);
-      if (!passwordIsValid) 
-        return res.status(403).json({ message: "Email đăng nhập hoặc mật khẩu không đúng !!" });
-      if (user.active === false) {
-        return res.status(403).json({ message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để hỗ trợ !!" });
-      }
-      const token = jwt.sign({ id: user._id, role: user.role, username: user.username }, config.jwt.secret, { expiresIn: '1h' });
-      res.status(200).json({ token, role: user.role });
+    const passwordIsValid = await bcrypt.compare(req.body.password, user.password);
+    if (!passwordIsValid)
+      return res.status(403).json({ message: "Email đăng nhập hoặc mật khẩu không đúng !!" });
+    if (user.active === false) {
+      return res.status(403).json({ message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để hỗ trợ !!" });
+    }
+    const token = jwt.sign({ id: user._id, role: user.role, username: user.username }, config.jwt.secret, { expiresIn: '1h' });
+    res.status(200).json({ token, role: user.role });
   } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ message: "Internal Server Error", error: error.message });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 });
 
@@ -71,11 +71,11 @@ router.get('/auth/google/callback', async (req, res) => {
     if (!user) {
       const hashedPassword = await bcrypt.hash('google_auth_password', 10);
       user = await userService.insertUser({
-          username: name,
-          password: hashedPassword,
-          email: email,
-          role: 'user',
-          active: true
+        username: name,
+        password: hashedPassword,
+        email: email,
+        role: 'user',
+        active: true
       });
     }
     const token = jwt.sign({ id: user._id, role: user.role, email: user.email }, config.jwt.secret, { expiresIn: '1h' });
@@ -129,27 +129,27 @@ router.post('/forgot-password', async (req, res) => {
   const verificationCode = Math.floor(10000 + Math.random() * 90000);
   verificationCodes[email] = verificationCode;
   const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: config.email.user, pass: config.email.pass }
+    service: 'gmail',
+    auth: { user: config.email.user, pass: config.email.pass }
   });
 
   const mailOptions = {
     from: config.email.user,
     to: email,
     subject: 'Thông Báo Mã Xác Thực Đặt Lại Mật Khẩu Từ EasyTalk',
-    
+
     html: `<p>Xin chào,</p>
       <p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu của bạn. Vui lòng sử dụng mã xác minh bên dưới để tiến hành đặt lại mật khẩu của bạn. Mã này có hiệu lực trong <strong>1 phút</strong>.</p>
       <h2 style="color: #4CAF50;">${verificationCode}</h2>
-      <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc <a href="pductai14@gmail.com">liên hệ với bộ phận hỗ trợ</a> nếu bạn có bất kỳ thắc mắc nào.</p>
+      <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc <a href="learningenglish@gmail.com">liên hệ với bộ phận hỗ trợ</a> nếu bạn có bất kỳ thắc mắc nào.</p>
       <p>Trân trọng,</p>
       <p>Nhóm hỗ trợ EasyTalk</p>`
-    };
+  };
   transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-          return res.status(500).json({ message: 'Failed to send email' });
-      }
-      res.json({ message: 'Verification code sent' });
+    if (error) {
+      return res.status(500).json({ message: 'Failed to send email' });
+    }
+    res.json({ message: 'Verification code sent' });
   });
 });
 
@@ -161,10 +161,10 @@ router.post('/verify-code', (req, res) => {
   const { email, code } = req.body;
 
   if (verificationCodes[email] && verificationCodes[email] == code) {
-      delete verificationCodes[email];
-      res.json({ message: 'Code verified' });
+    delete verificationCodes[email];
+    res.json({ message: 'Code verified' });
   } else {
-      res.status(400).json({ message: 'Invalid verification code' });
+    res.status(400).json({ message: 'Invalid verification code' });
   }
 });
 
@@ -178,7 +178,7 @@ router.post('/reset-password', async (req, res) => {
   const user = await userService.getUserByEmail(email);
 
   if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    return res.status(404).json({ message: 'User not found' });
   }
 
   await userService.updatePassword(email, hashedPassword);
