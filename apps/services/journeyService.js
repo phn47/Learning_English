@@ -69,7 +69,9 @@ class JourneyService {
             return [];
         }
     }
-    async getJourneyList(page = 1, limit = 10) {
+
+    async getJourneyList(page = 1, limit = 50) {
+
         const skip = (page - 1) * limit;
 
         const cursor = await this.journeysCollection

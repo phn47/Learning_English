@@ -45,7 +45,7 @@ class StoryService {
             { _id: new ObjectId(_id) },
             { $set: updateFields }
         );
-    }    
+    }
 
     async deleteStory(id) {
         return await this.storyCollection.deleteOne({ "_id": new ObjectId(id) });

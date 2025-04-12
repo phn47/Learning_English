@@ -13,7 +13,9 @@ class GateService {
         this.gatesDatabase = this.client.db(config.mongodb.database);
         this.gatesCollection = this.gatesDatabase.collection("gates");
     }
-    async getGateList(page = 1, limit = 20) {
+
+    async getGateList(page = 1, limit = 50) {
+
         const skip = (page - 1) * limit;
 
         const gates = await this.gatesCollection.aggregate([

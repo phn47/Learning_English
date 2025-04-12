@@ -1,5 +1,21 @@
 const bcrypt = require('bcrypt');
-const { mongoose, connectToDatabase } = require('./apps/database/database');
+const mongoose = require('mongoose');
+const config = require('./apps/config/setting.json');
+
+// Hàm kết nối đến MongoDB
+const connectToDatabase = async () => {
+    try {
+        const user = config.mongodb.username;
+        const pass = encodeURIComponent(config.mongodb.password);
+        const url = `mongodb+srv://${user}:${pass}@nam.n53g3.mongodb.net/${config.mongodb.database}?retryWrites=true&w=majority`;
+
+        await mongoose.connect(url);
+        console.log('Đã kết nối đến MongoDB thành công!');
+    } catch (error) {
+        console.error('Lỗi kết nối đến MongoDB:', error);
+        throw error;
+    }
+};
 
 // Import models
 const User = require('./apps/models/user');
@@ -46,66 +62,51 @@ const createSampleData = async () => {
             flashcardLists: {}
         };
 
-        // 1. Tạo Users
+        // **1. Tạo Users (Người dùng)**
         console.log('Đang tạo người dùng...');
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash('123456', salt);
 
-        // Tạo users
         const users = await db.collection('users').insertMany([
             {
                 username: 'admin',
-                email: 'admin@example.com',
+                email: 'admin@gmail.com',
                 password: hashedPassword,
                 role: 'admin',
                 active: true
             },
             {
-                username: 'teacher_nguyen',
-                email: 'teacher1@example.com',
-                password: hashedPassword,
-                role: 'teacher',
-                active: true
-            },
-            {
-                username: 'teacher_tran',
-                email: 'teacher2@example.com',
-                password: hashedPassword,
-                role: 'teacher',
-                active: true
-            },
-            {
                 username: 'ngoc_anh',
-                email: 'student1@example.com',
+                email: 'ngocanh@gmail.com',
                 password: hashedPassword,
                 role: 'user',
                 active: true
             },
             {
                 username: 'thanh_binh',
-                email: 'student2@example.com',
+                email: 'thanhbinh@gmail.com',
                 password: hashedPassword,
                 role: 'user',
                 active: true
             },
             {
                 username: 'minh_duc',
-                email: 'student3@example.com',
+                email: 'minhduc@gmail.com',
                 password: hashedPassword,
                 role: 'user',
                 active: true
             },
             {
                 username: 'thu_ha',
-                email: 'student4@example.com',
+                email: 'thuha@gmail.com',
                 password: hashedPassword,
                 role: 'user',
                 active: true
             },
             {
                 username: 'van_hoang',
-                email: 'student5@example.com',
+                email: 'vanhoang@gmail.com',
                 password: hashedPassword,
                 role: 'user',
                 active: true
@@ -119,7 +120,7 @@ const createSampleData = async () => {
 
         console.log(`Đã tạo ${users.insertedCount} người dùng`);
 
-        // 2. Tạo Flashcard Lists
+        // **2. Tạo Flashcard Lists (Danh sách Flashcard)**
         console.log('Đang tạo danh sách flashcard...');
 
         const flashcardLists = await db.collection('flashcardlists').insertMany([
@@ -172,7 +173,7 @@ const createSampleData = async () => {
 
         console.log(`Đã tạo ${flashcardLists.insertedCount} danh sách flashcard`);
 
-        // 3. Tạo Flashcards
+        // **3. Tạo Flashcards (Flashcard)**
         console.log('Đang tạo flashcards...');
 
         const flashcardsData = [
@@ -183,7 +184,7 @@ const createSampleData = async () => {
                 pos: 'exclamation',
                 pronunciation: '/həˈləʊ/',
                 exampleSentence: 'Hello, how are you today?',
-                image: 'https://images.unsplash.com/photo-1530983822321-fcac2d3c7568',
+                image: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list0,
                 createdAt: new Date()
@@ -194,7 +195,7 @@ const createSampleData = async () => {
                 pos: 'exclamation',
                 pronunciation: '/ˌɡʊdˈbaɪ/',
                 exampleSentence: 'Goodbye, see you tomorrow!',
-                image: 'https://images.unsplash.com/photo-1537815749002-de6a533c64db',
+                image: 'https://images.pexels.com/photos/2679618/pexels-photo-2679618.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list0,
                 createdAt: new Date()
@@ -205,7 +206,7 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/frend/',
                 exampleSentence: 'She is my best friend.',
-                image: 'https://images.unsplash.com/photo-1536549880819-4a4b9381b3b7',
+                image: 'https://images.pexels.com/photos/3184460/pexels-photo-3184460.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list0,
                 createdAt: new Date()
@@ -216,7 +217,7 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/ˈfæməli/',
                 exampleSentence: 'I have a large family with many cousins.',
-                image: 'https://images.unsplash.com/photo-1509506489701-dfe23b067808',
+                image: 'https://images.pexels.com/photos/3184461/pexels-photo-3184461.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list0,
                 createdAt: new Date()
@@ -227,12 +228,11 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/ˈweðə(r)/',
                 exampleSentence: 'The weather is sunny today.',
-                image: 'https://images.unsplash.com/photo-1530743373890-f3c506b0b5b1',
+                image: 'https://images.pexels.com/photos/1162251/pexels-photo-1162251.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list0,
                 createdAt: new Date()
             },
-
             // Từ vựng công nghệ thông tin (list1)
             {
                 word: 'software',
@@ -240,7 +240,7 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/ˈsɒftweə(r)/',
                 exampleSentence: 'The company develops software for businesses.',
-                image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c',
+                image: 'https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list1,
                 createdAt: new Date()
@@ -251,7 +251,7 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/ˈhɑːdweə(r)/',
                 exampleSentence: 'The hardware consists of computer components.',
-                image: 'https://images.unsplash.com/photo-1591370874773-6702e8f12fd8',
+                image: 'https://images.pexels.com/photos/4705634/pexels-photo-4705634.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list1,
                 createdAt: new Date()
@@ -262,7 +262,7 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/ˈælɡərɪðəm/',
                 exampleSentence: 'The search algorithm determines the results you see.',
-                image: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e',
+                image: 'https://images.pexels.com/photos/577585/pexels-photo-577585.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list1,
                 createdAt: new Date()
@@ -273,7 +273,7 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/ˈdeɪtəbeɪs/',
                 exampleSentence: 'The company stores customer information in a database.',
-                image: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d',
+                image: 'https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list1,
                 createdAt: new Date()
@@ -284,12 +284,11 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/ˈprəʊɡræmɪŋ/',
                 exampleSentence: 'Programming is an essential skill for developers.',
-                image: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713',
+                image: 'https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list1,
                 createdAt: new Date()
             },
-
             // Từ vựng du lịch và khách sạn (list2)
             {
                 word: 'passport',
@@ -297,7 +296,7 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/ˈpɑːspɔːt/',
                 exampleSentence: 'Don\'t forget to bring your passport.',
-                image: 'https://images.unsplash.com/photo-1554224311-beee415c201e',
+                image: 'https://images.pexels.com/photos/208745/pexels-photo-208745.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list2,
                 createdAt: new Date()
@@ -308,7 +307,7 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/ˈlʌɡɪdʒ/',
                 exampleSentence: 'We need to check in our luggage.',
-                image: 'https://images.unsplash.com/photo-1581553680321-4fffae59fccd',
+                image: 'https://images.pexels.com/photos/290164/pexels-photo-290164.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list2,
                 createdAt: new Date()
@@ -319,7 +318,7 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/ˌrezəˈveɪʃn/',
                 exampleSentence: 'I made a hotel reservation for two nights.',
-                image: 'https://images.unsplash.com/photo-1551632436-cbf8dd35adfa',
+                image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list2,
                 createdAt: new Date()
@@ -330,7 +329,7 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/ˈsaɪtsiːɪŋ/',
                 exampleSentence: 'We spent the day sightseeing in Paris.',
-                image: 'https://images.unsplash.com/photo-1530841377377-3ff06c0ca713',
+                image: 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list2,
                 createdAt: new Date()
@@ -341,12 +340,11 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/əˌkɒməˈdeɪʃn/',
                 exampleSentence: 'The accommodation includes breakfast each morning.',
-                image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945',
+                image: 'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list2,
                 createdAt: new Date()
             },
-
             // Từ vựng thức ăn và nhà hàng (list3)
             {
                 word: 'appetizer',
@@ -354,7 +352,7 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/ˈæpɪtaɪzə(r)/',
                 exampleSentence: 'We ordered some appetizers before the main course.',
-                image: 'https://images.unsplash.com/photo-1541795795328-f073b763494e',
+                image: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list3,
                 createdAt: new Date()
@@ -365,7 +363,7 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/dɪˈzɜːt/',
                 exampleSentence: 'Would you like some dessert after dinner?',
-                image: 'https://images.unsplash.com/photo-1551024506-0bccd828d307',
+                image: 'https://images.pexels.com/photos/1099680/pexels-photo-1099680.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list3,
                 createdAt: new Date()
@@ -376,12 +374,11 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/ˈmenjuː/',
                 exampleSentence: 'The waiter handed us the menu.',
-                image: 'https://images.unsplash.com/photo-1529417305485-480f579e7578',
+                image: 'https://images.pexels.com/photos/262047/pexels-photo-262047.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list3,
                 createdAt: new Date()
             },
-
             // Từ vựng IELTS thông dụng (list6)
             {
                 word: 'perspective',
@@ -389,7 +386,7 @@ const createSampleData = async () => {
                 pos: 'noun',
                 pronunciation: '/pəˈspektɪv/',
                 exampleSentence: 'From my perspective, this policy is beneficial.',
-                image: 'https://images.unsplash.com/photo-1545989253-02cc26577f88',
+                image: 'https://images.pexels.com/photos/414860/pexels-photo-414860.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list6,
                 createdAt: new Date()
@@ -400,7 +397,7 @@ const createSampleData = async () => {
                 pos: 'adjective',
                 pronunciation: '/ˌkɒntrəˈvɜːʃl/',
                 exampleSentence: 'The new law is highly controversial.',
-                image: 'https://images.unsplash.com/photo-1568744281068-74ba76a302bc',
+                image: 'https://images.pexels.com/photos/3184293/pexels-photo-3184293.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list6,
                 createdAt: new Date()
@@ -411,7 +408,7 @@ const createSampleData = async () => {
                 pos: 'adjective',
                 pronunciation: '/səbˈstænʃl/',
                 exampleSentence: 'There is substantial evidence to support this theory.',
-                image: 'https://images.unsplash.com/photo-1508345228704-935cc84bf5e2',
+                image: 'https://images.pexels.com/photos/3184294/pexels-photo-3184294.jpeg',
                 audio: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3',
                 flashcardList: refs.flashcardLists.list6,
                 createdAt: new Date()
@@ -422,7 +419,7 @@ const createSampleData = async () => {
 
         console.log(`Đã tạo ${flashcards.insertedCount} flashcards`);
 
-        // 4. Tạo Journeys
+        // **4. Tạo Journeys (Hành trình học tập)**
         console.log('Đang tạo hành trình học tập...');
 
         const journeysData = [
@@ -485,7 +482,7 @@ const createSampleData = async () => {
 
         console.log(`Đã tạo ${journeys.insertedCount} hành trình học tập`);
 
-        // 5. Tạo Gates
+        // **5. Tạo Gates (Cổng học tập)**
         console.log('Đang tạo cổng học tập...');
 
         const gatesData = [
@@ -517,7 +514,6 @@ const createSampleData = async () => {
                 createdAt: new Date(),
                 updatedAt: new Date()
             },
-
             // Gates cho Tiếng Anh Giao Tiếp (journey1)
             {
                 title: 'Giao tiếp hàng ngày',
@@ -546,7 +542,6 @@ const createSampleData = async () => {
                 createdAt: new Date(),
                 updatedAt: new Date()
             },
-
             // Gates cho Tiếng Anh Trung Cấp (journey2)
             {
                 title: 'Ngữ pháp trung cấp',
@@ -566,7 +561,6 @@ const createSampleData = async () => {
                 createdAt: new Date(),
                 updatedAt: new Date()
             },
-
             // Gates cho Luyện Thi IELTS (journey4)
             {
                 title: 'IELTS Listening',
@@ -636,7 +630,7 @@ const createSampleData = async () => {
             { $set: { gates: [refs.gates.gate8, refs.gates.gate9, refs.gates.gate10, refs.gates.gate11] } }
         );
 
-        // 6. Tạo Pronunciations
+        // **6. Tạo Pronunciations (Bài học phát âm)**
         console.log('Đang tạo bài học phát âm...');
 
         const pronunciationsData = [
@@ -718,7 +712,7 @@ const createSampleData = async () => {
 
         console.log(`Đã tạo ${pronunciations.insertedCount} bài học phát âm`);
 
-        // 7. Tạo Grammars
+        // **7. Tạo Grammars (Bài học ngữ pháp)**
         console.log('Đang tạo bài học ngữ pháp...');
 
         const grammarsData = [
@@ -744,7 +738,7 @@ const createSampleData = async () => {
                     <li>Do you speak English? (Bạn có nói tiếng Anh không?)</li>
                 </ul>`,
                 createdAt: new Date(),
-                images: ['https://flatworldknowledge.lardbucket.org/books/writers-handbook/section_18/e6f4a1dab4d7eb0c9c6f675f3a7efe47.jpg']
+                images: ['https://www.perfect-english-grammar.com/image-files/present-simple-uses.png']
             },
             {
                 description: 'Thì hiện tại tiếp diễn (Present Continuous)',
@@ -767,7 +761,7 @@ const createSampleData = async () => {
                     <li>Is she cooking dinner? (Cô ấy đang nấu bữa tối phải không?)</li>
                 </ul>`,
                 createdAt: new Date(),
-                images: ['https://d2gg9evh47fn9z.cloudfront.net/800px_COLOURBOX32809011.jpg']
+                images: ['https://www.grammar.cl/english-games/images/present-continuous-tense.jpg']
             },
             {
                 description: 'Động từ To Be (am, is, are)',
@@ -814,7 +808,7 @@ const createSampleData = async () => {
                     <li>Did they visit the museum? (Họ đã thăm bảo tàng phải không?)</li>
                 </ul>`,
                 createdAt: new Date(),
-                images: ['https://i.ytimg.com/vi/QaERLpS1HrM/maxresdefault.jpg']
+                images: ['https://www.grammar.cl/english-games/images/past-simple-tense.jpg']
             },
             {
                 description: 'Câu điều kiện loại 1 (First Conditional)',
@@ -845,7 +839,7 @@ const createSampleData = async () => {
 
         console.log(`Đã tạo ${grammars.insertedCount} bài học ngữ pháp`);
 
-        // 8. Tạo Stages
+        // **8. Tạo Stages (Giai đoạn học tập)**
         console.log('Đang tạo giai đoạn học tập...');
 
         const stagesData = [
@@ -912,7 +906,6 @@ const createSampleData = async () => {
                 createdAt: new Date(),
                 updatedAt: new Date()
             },
-
             // Stages cho gate "Giao tiếp cơ bản" (gate1)
             {
                 title: 'Hỏi đường và phương hướng',
@@ -967,7 +960,6 @@ const createSampleData = async () => {
                 createdAt: new Date(),
                 updatedAt: new Date()
             },
-
             // Stages cho gate "Ngữ pháp cơ bản" (gate2)
             {
                 title: 'Động từ To Be',
@@ -1031,7 +1023,6 @@ const createSampleData = async () => {
                 createdAt: new Date(),
                 updatedAt: new Date()
             },
-
             // Stages cho gate "IELTS Writing" (gate10)
             {
                 title: 'Task 1: Biểu đồ và bảng dữ liệu',
@@ -1123,16 +1114,14 @@ const createSampleData = async () => {
             { $set: { stages: [refs.stages.stage6, refs.stages.stage7] } }
         );
 
-        // 9. Tạo Pronunciation Exercises
+        // **9. Tạo Pronunciation Exercises (Bài tập phát âm)**
         console.log('Đang tạo bài tập phát âm...');
 
         const pronunciationExercises = [];
 
         // Bài tập luyện âm /æ/
         const pronExercise1 = new PronunciationExercise();
-        pronExercise1._id = new mongoose.Types.ObjectId();
         pronExercise1.title = 'Luyện âm /æ/';
-
         pronExercise1.addQuestion(
             'Từ nào có chứa âm /æ/?',
             'multiple-choice',
@@ -1140,7 +1129,6 @@ const createSampleData = async () => {
             'Từ "cat" phát âm là /kæt/ và chứa âm /æ/.',
             ['cat', 'cute', 'cot', 'kite']
         );
-
         pronExercise1.addQuestion(
             'Từ nào có chứa âm /æ/?',
             'multiple-choice',
@@ -1148,7 +1136,6 @@ const createSampleData = async () => {
             'Từ "map" phát âm là /mæp/ và chứa âm /æ/.',
             ['map', 'mop', 'moon', 'mute']
         );
-
         pronExercise1.addQuestion(
             'Nghe và chọn từ chứa âm /æ/:',
             'multiple-choice',
@@ -1159,9 +1146,7 @@ const createSampleData = async () => {
 
         // Bài tập luyện âm /ə/ (schwa)
         const pronExercise2 = new PronunciationExercise();
-        pronExercise2._id = new mongoose.Types.ObjectId();
         pronExercise2.title = 'Luyện âm schwa /ə/';
-
         pronExercise2.addQuestion(
             'Từ nào KHÔNG có âm /ə/?',
             'multiple-choice',
@@ -1169,7 +1154,6 @@ const createSampleData = async () => {
             'Từ "sit" không chứa âm schwa /ə/. Các từ khác đều có âm schwa ở ít nhất một âm tiết.',
             ['about', 'sit', 'banana', 'computer']
         );
-
         pronExercise2.addQuestion(
             'Từ nào có âm /ə/ ở âm tiết cuối?',
             'multiple-choice',
@@ -1177,7 +1161,6 @@ const createSampleData = async () => {
             'Từ "teacher" có âm schwa /ə/ ở âm tiết cuối, phát âm là /ˈtiːtʃə/.',
             ['teacher', 'about', 'again', 'apply']
         );
-
         pronExercise2.addQuestion(
             'Âm tiết nào trong từ "international" có âm /ə/?',
             'multiple-choice',
@@ -1188,9 +1171,7 @@ const createSampleData = async () => {
 
         // Bài tập luyện âm /θ/ và /ð/
         const pronExercise3 = new PronunciationExercise();
-        pronExercise3._id = new mongoose.Types.ObjectId();
         pronExercise3.title = 'Luyện âm /θ/ và /ð/';
-
         pronExercise3.addQuestion(
             'Từ nào có âm /θ/ (th không vang)?',
             'multiple-choice',
@@ -1198,7 +1179,6 @@ const createSampleData = async () => {
             'Từ "think" có âm /θ/ (th không vang), phát âm là /θɪŋk/.',
             ['think', 'this', 'they', 'mother']
         );
-
         pronExercise3.addQuestion(
             'Từ nào có âm /ð/ (th vang)?',
             'multiple-choice',
@@ -1207,7 +1187,6 @@ const createSampleData = async () => {
             ['breath', 'health', 'brother', 'mouth']
         );
 
-        // Chuyển đối tượng thành document để insert vào MongoDB
         pronunciationExercises.push(
             {
                 _id: pronExercise1._id,
@@ -1229,20 +1208,17 @@ const createSampleData = async () => {
             }
         );
 
-        // Inserting the pronunciation exercises
         const pronExResult = await db.collection('pronunciationexercises').insertMany(pronunciationExercises);
         console.log(`Đã tạo ${pronExResult.insertedCount} bài tập phát âm`);
 
-        // 10. Tạo Grammar Exercises
+        // **10. Tạo Grammar Exercises (Bài tập ngữ pháp)**
         console.log('Đang tạo bài tập ngữ pháp...');
 
         const grammarExercises = [];
 
         // Bài tập hiện tại đơn
         const grammarExercise1 = new GrammarExercise();
-        grammarExercise1._id = new mongoose.Types.ObjectId();
         grammarExercise1.title = 'Bài tập thì hiện tại đơn';
-
         grammarExercise1.addQuestion(
             'He ____ to school every day.',
             'multiple-choice',
@@ -1250,7 +1226,6 @@ const createSampleData = async () => {
             'Với chủ ngữ là "He" (ngôi thứ 3, số ít), động từ "go" phải thêm "es" thành "goes" trong thì hiện tại đơn.',
             ['go', 'goes', 'going', 'went']
         );
-
         grammarExercise1.addQuestion(
             'They ____ breakfast at 7 AM.',
             'multiple-choice',
@@ -1261,9 +1236,7 @@ const createSampleData = async () => {
 
         // Bài tập động từ To Be
         const grammarExercise2 = new GrammarExercise();
-        grammarExercise2._id = new mongoose.Types.ObjectId();
         grammarExercise2.title = 'Bài tập động từ To Be';
-
         grammarExercise2.addQuestion(
             'I ____ a student.',
             'multiple-choice',
@@ -1271,7 +1244,6 @@ const createSampleData = async () => {
             'Với chủ ngữ "I", dùng "am" là dạng đúng của động từ to be trong thì hiện tại.',
             ['am', 'is', 'are', 'be']
         );
-
         grammarExercise2.addQuestion(
             'They ____ not at home now.',
             'multiple-choice',
@@ -1279,7 +1251,6 @@ const createSampleData = async () => {
             'Với chủ ngữ "They", dùng "are" là dạng đúng của động từ to be trong thì hiện tại.',
             ['am', 'is', 'are', 'be']
         );
-
         grammarExercise2.addQuestion(
             'Rewrite: She is tall. -> ____',
             'rewrite',
@@ -1290,9 +1261,7 @@ const createSampleData = async () => {
 
         // Bài tập hiện tại tiếp diễn
         const grammarExercise3 = new GrammarExercise();
-        grammarExercise3._id = new mongoose.Types.ObjectId();
         grammarExercise3.title = 'Bài tập thì hiện tại tiếp diễn';
-
         grammarExercise3.addQuestion(
             'Look! The baby ____ (sleep).',
             'fill-in-the-blank',
@@ -1300,7 +1269,6 @@ const createSampleData = async () => {
             'Trong thì hiện tại tiếp diễn, với chủ ngữ ngôi thứ 3 số ít (the baby), cấu trúc là "is + V-ing".',
             []
         );
-
         grammarExercise3.addQuestion(
             'They ____ (not/watch) TV right now.',
             'fill-in-the-blank',
@@ -1309,7 +1277,6 @@ const createSampleData = async () => {
             []
         );
 
-        // Chuyển đối tượng thành document để insert vào MongoDB
         grammarExercises.push(
             {
                 _id: grammarExercise1._id,
@@ -1331,20 +1298,17 @@ const createSampleData = async () => {
             }
         );
 
-        // Inserting the grammar exercises
         const grammarExResult = await db.collection('grammarexercises').insertMany(grammarExercises);
         console.log(`Đã tạo ${grammarExResult.insertedCount} bài tập ngữ pháp`);
 
-        // 11. Tạo Vocabulary Exercises
+        // **11. Tạo Vocabulary Exercises (Bài tập từ vựng)**
         console.log('Đang tạo bài tập từ vựng...');
 
         const vocabularyExercises = [];
 
         // Bài tập từ vựng về gia đình
         const vocabExercise1 = new VocabularyExercise();
-        vocabExercise1._id = new mongoose.Types.ObjectId();
         vocabExercise1.title = 'Từ vựng về gia đình';
-
         vocabExercise1.addQuestion(
             'Father\'s sister is your ____.',
             'multiple-choice',
@@ -1352,7 +1316,6 @@ const createSampleData = async () => {
             'Em gái hoặc chị gái của bố được gọi là "aunt" (dì/cô).',
             ['aunt', 'uncle', 'niece', 'nephew']
         );
-
         vocabExercise1.addQuestion(
             'Mother\'s mother is your ____.',
             'multiple-choice',
@@ -1360,7 +1323,6 @@ const createSampleData = async () => {
             'Mẹ của mẹ được gọi là "grandmother" (bà ngoại).',
             ['grandmother', 'grandfather', 'granddaughter', 'grandson']
         );
-
         vocabExercise1.addQuestion(
             'Your sister\'s son is your ____.',
             'multiple-choice',
@@ -1371,9 +1333,7 @@ const createSampleData = async () => {
 
         // Bài tập từ vựng về thức ăn
         const vocabExercise2 = new VocabularyExercise();
-        vocabExercise2._id = new mongoose.Types.ObjectId();
         vocabExercise2.title = 'Từ vựng về thức ăn và nhà hàng';
-
         vocabExercise2.addQuestion(
             'Món ăn được phục vụ trước bữa ăn chính gọi là:',
             'multiple-choice',
@@ -1381,7 +1341,6 @@ const createSampleData = async () => {
             '"Appetizer" là món khai vị, được phục vụ trước bữa ăn chính.',
             ['appetizer', 'dessert', 'main course', 'beverage']
         );
-
         vocabExercise2.addQuestion(
             'Món ăn ngọt được phục vụ sau bữa ăn chính gọi là:',
             'multiple-choice',
@@ -1389,7 +1348,6 @@ const createSampleData = async () => {
             '"Dessert" là món tráng miệng, thường có vị ngọt và được phục vụ sau bữa ăn chính.',
             ['appetizer', 'dessert', 'main course', 'side dish']
         );
-
         vocabExercise2.addQuestion(
             'Người phục vụ trong nhà hàng được gọi là:',
             'multiple-choice',
@@ -1400,9 +1358,7 @@ const createSampleData = async () => {
 
         // Bài tập từ vựng học thuật IELTS
         const vocabExercise3 = new VocabularyExercise();
-        vocabExercise3._id = new mongoose.Types.ObjectId();
         vocabExercise3.title = 'Từ vựng học thuật IELTS';
-
         vocabExercise3.addQuestion(
             'Choose the synonym of "significant":',
             'multiple-choice',
@@ -1410,7 +1366,6 @@ const createSampleData = async () => {
             '"Significant" có nghĩa là "quan trọng, đáng kể", tương đồng với "important".',
             ['important', 'small', 'unclear', 'simple']
         );
-
         vocabExercise3.addQuestion(
             'Choose the synonym of "controversial":',
             'multiple-choice',
@@ -1418,7 +1373,6 @@ const createSampleData = async () => {
             '"Controversial" có nghĩa là "gây tranh cãi", tương đồng với "debatable" (có thể tranh luận).',
             ['debatable', 'accepted', 'traditional', 'established']
         );
-
         vocabExercise3.addQuestion(
             'Choose the antonym of "benefit":',
             'multiple-choice',
@@ -1427,7 +1381,6 @@ const createSampleData = async () => {
             ['advantage', 'profit', 'drawback', 'improvement']
         );
 
-        // Chuyển đối tượng thành document để insert vào MongoDB
         vocabularyExercises.push(
             {
                 _id: vocabExercise1._id,
@@ -1449,18 +1402,16 @@ const createSampleData = async () => {
             }
         );
 
-        // Inserting the vocabulary exercises
         const vocabExResult = await db.collection('vocabularyexercises').insertMany(vocabularyExercises);
         console.log(`Đã tạo ${vocabExResult.insertedCount} bài tập từ vựng`);
 
-        // 12. Tạo Blogs
+        // **12. Tạo Blogs (Blog)**
         console.log('Đang tạo blogs...');
 
         const blogsData = [
             {
                 title: '10 bí quyết học tiếng Anh hiệu quả',
-                content: `
-                <p>Học tiếng Anh hiệu quả đòi hỏi phương pháp phù hợp và kiên trì thực hành. Dưới đây là 10 bí quyết giúp bạn cải thiện khả năng tiếng Anh:</p>
+                content: `<p>Học tiếng Anh hiệu quả đòi hỏi phương pháp phù hợp và kiên trì thực hành. Dưới đây là 10 bí quyết giúp bạn cải thiện khả năng tiếng Anh:</p>
                 <ol>
                     <li><strong>Học từ vựng theo chủ đề</strong>: Thay vì học các từ riêng lẻ, hãy tổ chức từ vựng theo chủ đề để dễ nhớ và áp dụng.</li>
                     <li><strong>Thực hành nói mỗi ngày</strong>: Dành ít nhất 15 phút mỗi ngày để nói tiếng Anh, ngay cả khi bạn chỉ nói một mình.</li>
@@ -1479,8 +1430,7 @@ const createSampleData = async () => {
             },
             {
                 title: '5 cách cải thiện kỹ năng nghe tiếng Anh',
-                content: `
-                <p>Kỹ năng nghe là một trong những kỹ năng quan trọng nhất khi học tiếng Anh, nhưng cũng thường là kỹ năng khó nhất đối với người học. Dưới đây là 5 cách hiệu quả giúp bạn cải thiện kỹ năng nghe:</p>
+                content: `<p>Kỹ năng nghe là một trong những kỹ năng quan trọng nhất khi học tiếng Anh, nhưng cũng thường là kỹ năng khó nhất đối với người học. Dưới đây là 5 cách hiệu quả giúp bạn cải thiện kỹ năng nghe:</p>
                 <ol>
                     <li><strong>Nghe podcast tiếng Anh hàng ngày</strong>: Podcast là nguồn tài liệu tuyệt vời để luyện nghe với nhiều chủ đề và cấp độ khác nhau. Bắt đầu với các podcast có tốc độ nói chậm và dần dần chuyển sang các podcast thông thường dành cho người bản ngữ.</li>
                     <li><strong>Xem phim không phụ đề hoặc với phụ đề tiếng Anh</strong>: Ban đầu, bạn có thể xem với phụ đề tiếng Việt, sau đó chuyển sang phụ đề tiếng Anh và cuối cùng là không sử dụng phụ đề. Hãy chọn những bộ phim hoặc chương trình TV mà bạn đã quen thuộc với nội dung.</li>
@@ -1494,9 +1444,7 @@ const createSampleData = async () => {
             },
             {
                 title: 'Lộ trình học IELTS từ 0 đến 7.0+',
-                content: `
-                <p>Nhiều người học tiếng Anh mong muốn đạt được điểm IELTS cao nhưng không biết bắt đầu từ đâu. Dưới đây là lộ trình học IELTS hiệu quả từ cơ bản đến nâng cao:</p>
-                
+                content: `<p>Nhiều người học tiếng Anh mong muốn đạt được điểm IELTS cao nhưng không biết bắt đầu từ đâu. Dưới đây là lộ trình học IELTS hiệu quả từ cơ bản đến nâng cao:</p>
                 <h3>Giai đoạn 1: Xây dựng nền tảng (1-3 tháng)</h3>
                 <ul>
                     <li>Học và củng cố ngữ pháp cơ bản đến trung cấp</li>
@@ -1504,7 +1452,6 @@ const createSampleData = async () => {
                     <li>Làm quen với cấu trúc bài thi IELTS và các dạng câu hỏi</li>
                     <li>Luyện phát âm chuẩn và nghe hiểu cơ bản</li>
                 </ul>
-                
                 <h3>Giai đoạn 2: Phát triển kỹ năng (2-4 tháng)</h3>
                 <ul>
                     <li>Học từ vựng học thuật và từ vựng theo chủ đề IELTS</li>
@@ -1513,7 +1460,6 @@ const createSampleData = async () => {
                     <li>Phát triển kỹ năng nghe với các bài nghe đa dạng</li>
                     <li>Tập nói theo các chủ đề thông dụng trong IELTS Speaking</li>
                 </ul>
-                
                 <h3>Giai đoạn 3: Nâng cao và hoàn thiện (1-3 tháng)</h3>
                 <ul>
                     <li>Mở rộng vốn từ vựng học thuật nâng cao</li>
@@ -1522,7 +1468,6 @@ const createSampleData = async () => {
                     <li>Học các cấu trúc ngữ pháp phức tạp và cách sử dụng linh hoạt</li>
                     <li>Nâng cao kỹ năng viết với các cấu trúc câu đa dạng và từ vựng học thuật</li>
                 </ul>
-                
                 <p><strong>Lưu ý quan trọng:</strong></p>
                 <ul>
                     <li>Lộ trình trên chỉ mang tính tham khảo, thời gian học tập sẽ phụ thuộc vào trình độ ban đầu và thời gian bạn có thể dành cho việc học.</li>
@@ -1530,76 +1475,54 @@ const createSampleData = async () => {
                     <li>Nên có giáo viên hoặc người hướng dẫn để nhận phản hồi và điều chỉnh quá trình học tập.</li>
                     <li>Làm nhiều bài thi thử để làm quen với định dạng và áp lực thời gian của bài thi thật.</li>
                 </ul>
-                
                 <p>Hãy nhớ rằng việc học IELTS không chỉ là để đạt điểm cao trong kỳ thi mà còn là cơ hội để nâng cao khả năng tiếng Anh tổng thể của bạn. Kiên trì và thực hành thường xuyên sẽ mang lại kết quả tốt!</p>`,
                 createdAt: new Date(),
                 updatedAt: new Date()
             },
             {
                 title: 'Phương pháp học từ vựng tiếng Anh hiệu quả',
-                content: `
-                <p>Việc học và nhớ từ vựng tiếng Anh luôn là thách thức đối với nhiều người học. Dưới đây là những phương pháp học từ vựng hiệu quả giúp bạn ghi nhớ lâu dài:</p>
-                
+                content: `<p>Việc học và nhớ từ vựng tiếng Anh luôn là thách thức đối với nhiều người học. Dưới đây là những phương pháp học từ vựng hiệu quả giúp bạn ghi nhớ lâu dài:</p>
                 <h3>1. Học từ trong ngữ cảnh</h3>
                 <p>Thay vì học từ vựng riêng lẻ, hãy học chúng trong câu hoặc đoạn văn. Điều này giúp bạn hiểu cách sử dụng từ trong tình huống thực tế và dễ nhớ hơn.</p>
-                
                 <h3>2. Sử dụng phương pháp Spaced Repetition</h3>
                 <p>Đây là phương pháp ôn tập theo khoảng thời gian tăng dần. Khi bạn vừa học một từ mới, bạn nên ôn lại nó sau một ngày, sau đó ba ngày, một tuần, hai tuần, và cứ tiếp tục như vậy. Các ứng dụng như Anki hoặc Quizlet có thể giúp bạn thực hiện phương pháp này.</p>
-                
                 <h3>3. Sử dụng flashcard</h3>
                 <p>Flashcard là công cụ học từ vựng cổ điển nhưng vẫn rất hiệu quả. Bạn có thể tự tạo flashcard bằng giấy hoặc sử dụng các ứng dụng trên điện thoại. Mỗi flashcard nên có từ tiếng Anh ở một mặt và nghĩa, ví dụ, cách phát âm ở mặt còn lại.</p>
-                
                 <h3>4. Phân loại từ vựng theo chủ đề</h3>
                 <p>Học từ vựng theo nhóm chủ đề (như gia đình, thực phẩm, du lịch...) giúp bạn liên kết các từ với nhau và dễ nhớ hơn. Ngoài ra, khi cần sử dụng trong tình huống cụ thể, bạn sẽ dễ dàng truy xuất các từ liên quan.</p>
-                
                 <h3>5. Sử dụng kỹ thuật liên tưởng</h3>
-                <p>Tạo ra những hình ảnh hoặc câu chuyện vui nhộn, thậm chí là vô lý để gắn với từ mới. Não bộ của chúng ta có xu hướng nhớ những điều bất thường hoặc hài hước.</p>
-                
+                <p>Tạo ra những hình ảnh hoặc câu chuyện vui nhộn, thậm chí là vô lý để gắn với từ mới. Não bộ của chúng ta có xu hướng nhớrosa (thường là hình ảnh) nhớ nhớ lại cách sử dụng từ vựng mới trong giao tiếp</p>
                 <h3>6. Học qua hình ảnh và âm thanh</h3>
                 <p>Kết hợp từ vựng với hình ảnh và cách phát âm giúp tăng cường trí nhớ. Nhiều ứng dụng học từ vựng hiện nay đã tích hợp cả hình ảnh minh họa và file âm thanh phát âm.</p>
-                
                 <h3>7. Sử dụng từ vựng mới trong giao tiếp</h3>
                 <p>Thực hành sử dụng từ vựng mới trong hội thoại, viết nhật ký hoặc bài luận. Việc áp dụng từ vựng vào thực tế giúp bạn nhớ lâu hơn và hiểu sâu hơn về cách sử dụng từ.</p>
-                
                 <h3>8. Đọc nhiều và đa dạng</h3>
                 <p>Đọc sách, báo, tạp chí, blog bằng tiếng Anh giúp bạn tiếp xúc với từ vựng trong ngữ cảnh tự nhiên. Bắt đầu với các tài liệu phù hợp với trình độ của bạn và dần dần tăng độ khó.</p>
-                
                 <p>Hãy nhớ rằng, học từ vựng là một quá trình liên tục. Kiên trì thực hành hàng ngày, kết hợp nhiều phương pháp khác nhau sẽ giúp bạn xây dựng vốn từ vựng phong phú và nhớ lâu hơn.</p>`,
                 createdAt: new Date(),
                 updatedAt: new Date()
             },
             {
                 title: 'Cách phát âm tiếng Anh chuẩn như người bản ngữ',
-                content: `
-                <p>Phát âm chuẩn là một trong những yếu tố quan trọng giúp giao tiếp tiếng Anh trôi chảy và tự tin. Dưới đây là những bí quyết để phát âm tiếng Anh như người bản ngữ:</p>
-                
+                content: `<p>Phát âm chuẩn là một trong những yếu tố quan trọng giúp giao tiếp tiếng Anh trôi chảy và tự tin. Dưới đây là những bí quyết để phát âm tiếng Anh như người bản ngữ:</p>
                 <h3>1. Hiểu rõ về IPA (International Phonetic Alphabet)</h3>
                 <p>Bảng phiên âm quốc tế IPA là công cụ cực kỳ hữu ích để học phát âm. Mỗi ký hiệu trong IPA đại diện cho một âm cụ thể, giúp bạn biết chính xác cách phát âm một từ mà không phụ thuộc vào cách viết.</p>
-                
                 <h3>2. Tập trung vào các âm khó</h3>
                 <p>Người Việt thường gặp khó khăn với một số âm tiếng Anh như /θ/ (th trong "think"), /ð/ (th trong "this"), /r/, /l/, /ʃ/ (sh), /ʒ/ (s trong "vision"). Hãy dành thời gian tập trung luyện các âm này.</p>
-                
                 <h3>3. Luyện tập nghe và bắt chước</h3>
                 <p>Nghe nhiều và bắt chước cách phát âm của người bản ngữ là phương pháp hiệu quả. Sử dụng các video, podcast hoặc bài hát bằng tiếng Anh, sau đó lặp lại và cố gắng bắt chước âm điệu và nhịp điệu.</p>
-                
                 <h3>4. Chú ý đến trọng âm và ngữ điệu</h3>
                 <p>Tiếng Anh là ngôn ngữ nhấn trọng âm, nghĩa là một số âm tiết được phát âm mạnh hơn trong từ (word stress) và một số từ được nhấn mạnh hơn trong câu (sentence stress). Ngữ điệu (intonation) cũng rất quan trọng và có thể thay đổi ý nghĩa của câu.</p>
-                
                 <h3>5. Sử dụng công cụ ghi âm</h3>
                 <p>Ghi âm giọng nói của bạn và so sánh với phát âm chuẩn. Điều này giúp bạn nhận biết những âm cần cải thiện.</p>
-                
                 <h3>6. Luyện tập với tongue twisters</h3>
                 <p>Tongue twisters (câu nói lưỡi) là những câu khó phát âm, giúp rèn luyện cơ miệng và lưỡi. Ví dụ: "She sells seashells by the seashore" hoặc "Red lorry, yellow lorry".</p>
-                
                 <h3>7. Học phát âm liên kết (linking)</h3>
                 <p>Người bản ngữ thường nối các từ lại với nhau khi nói, tạo ra hiện tượng liên kết âm. Ví dụ: "What are you doing?" thường được phát âm là "Wha-ta-you doing?". Việc học cách liên kết âm giúp bạn nói tự nhiên hơn.</p>
-                
                 <h3>8. Tìm kiếm phản hồi</h3>
                 <p>Nếu có thể, hãy tìm giáo viên hoặc bạn bè là người bản ngữ để nhận phản hồi về phát âm của bạn. Họ có thể chỉ ra những lỗi mà bạn không nhận ra.</p>
-                
                 <h3>9. Kiên trì luyện tập</h3>
                 <p>Cải thiện phát âm là quá trình cần thời gian. Hãy dành ít nhất 15 phút mỗi ngày để luyện phát âm và kiên trì thực hiện.</p>
-                
                 <p>Nhớ rằng, mục tiêu không nhất thiết phải có giọng hoàn toàn như người bản ngữ, mà quan trọng hơn là phát âm rõ ràng và dễ hiểu trong giao tiếp. Hãy kiên trì và tận hưởng quá trình học!</p>`,
                 createdAt: new Date(),
                 updatedAt: new Date()
@@ -1607,15 +1530,15 @@ const createSampleData = async () => {
         ];
 
         const blogs = await db.collection('blogs').insertMany(blogsData);
-
         console.log(`Đã tạo ${blogs.insertedCount} blogs`);
 
-        // 13. Tạo UserProgress
+        // **13. Tạo UserProgress (Tiến trình người dùng)**
         console.log('Đang tạo tiến trình người dùng...');
 
         const userProgressData = [
             {
-                user: refs.users.user3, // ngoc_anh
+                user: refs.users.user1, // ngoc_anh
+                journey: refs.journeys.journey0, // Tiếng Anh Cơ Bản
                 unlockedGates: [refs.gates.gate0, refs.gates.gate1],
                 unlockedStages: [refs.stages.stage0, refs.stages.stage1, refs.stages.stage2],
                 experiencePoints: 150,
@@ -1623,7 +1546,8 @@ const createSampleData = async () => {
                 updatedAt: new Date()
             },
             {
-                user: refs.users.user4, // thanh_binh
+                user: refs.users.user2, // thanh_binh
+                journey: refs.journeys.journey0, // Tiếng Anh Cơ Bản
                 unlockedGates: [refs.gates.gate0, refs.gates.gate1, refs.gates.gate2],
                 unlockedStages: [refs.stages.stage0, refs.stages.stage1, refs.stages.stage2, refs.stages.stage3, refs.stages.stage4],
                 experiencePoints: 320,
@@ -1631,7 +1555,8 @@ const createSampleData = async () => {
                 updatedAt: new Date()
             },
             {
-                user: refs.users.user5, // minh_duc
+                user: refs.users.user3, // minh_duc
+                journey: refs.journeys.journey0, // Tiếng Anh Cơ Bản
                 unlockedGates: [refs.gates.gate0],
                 unlockedStages: [refs.stages.stage0],
                 experiencePoints: 50,
@@ -1639,8 +1564,9 @@ const createSampleData = async () => {
                 updatedAt: new Date()
             },
             {
-                user: refs.users.user6, // thu_ha
-                unlockedGates: [refs.gates.gate0, refs.gates.gate1, refs.gates.gate2, refs.gates.gate3],
+                user: refs.users.user4, // thu_ha
+                journey: refs.journeys.journey0, // Tiếng Anh Cơ Bản
+                unlockedGates: [refs.gates.gate0, refs.gates.gate1, refs.gates.gate2],
                 unlockedStages: [refs.stages.stage0, refs.stages.stage1, refs.stages.stage2, refs.stages.stage3, refs.stages.stage4, refs.stages.stage5],
                 experiencePoints: 450,
                 createdAt: new Date(),
@@ -1649,8 +1575,79 @@ const createSampleData = async () => {
         ];
 
         const userProgress = await db.collection('userprogresses').insertMany(userProgressData);
-
         console.log(`Đã tạo ${userProgress.insertedCount} tiến trình người dùng`);
+
+        // **14. Tạo Stories (Câu chuyện)**
+        console.log('Đang tạo các câu chuyện...');
+
+        const storiesData = [
+            {
+                title: 'The Lion and the Mouse - Sư tử và Chuột',
+                description: 'Một câu chuyện ngụ ngôn về lòng tốt và sự biết ơn',
+                content: `<p>Once, a mighty lion was sleeping in the forest when a tiny mouse accidentally ran across his nose. The lion woke up angrily and caught the mouse.</p>
+                <p>"Please let me go," begged the mouse. "One day I might help you!"</p>
+                <p>The lion laughed at the idea that such a tiny creature could ever help him, but he was in a good mood and let the mouse go.</p>
+                <p>A few days later, the lion was caught in a hunter's net. He roared in frustration, unable to free himself.</p>
+                <p>The little mouse heard his roars and came running. Using its sharp teeth, the mouse gnawed through the ropes of the net, freeing the lion.</p>
+                <p>"You see," said the mouse, "even a little friend can be a great help!"</p>
+                <p><strong>Bài học:</strong> Đừng bao giờ đánh giá thấp người khác vì kích thước hay vẻ bề ngoài của họ.</p>`,
+                images: ['https://images.pexels.com/photos/33045/lion-wild-africa-african.jpg'],
+                createdAt: new Date()
+            },
+            {
+                title: 'The Tortoise and the Hare - Rùa và Thỏ',
+                description: 'Câu chuyện cổ tích nổi tiếng về sự kiên trì và tính kiêu ngạo',
+                content: `<p>A hare was always boasting about how fast he could run. Tired of hearing him brag, a tortoise challenged him to a race.</p>
+                <p>"You? Race me? That's a joke!"</p>
+                <p>The race began, and the hare quickly left the tortoise far behind. Feeling confident, he decided to take a nap.</p>
+                <p>"I can sleep and still win," he thought.</p>
+                <p>The tortoise kept moving slowly but steadily. While the hare slept, the tortoise passed him and eventually crossed the finish line.</p>
+                <p>The hare woke up and ran as fast as he could, but it was too late. The tortoise had won!</p>
+                <p><strong>Bài học:</strong> Chậm và chắc sẽ thắng cuộc đua. Đừng bao giờ kiêu ngạo và đánh giá thấp đối thủ.</p>`,
+                images: ['https://images.pexels.com/photos/8769/animal-reptile-turtle-tortoise.jpg'],
+                createdAt: new Date()
+            },
+            {
+                title: 'The Boy Who Cried Wolf - Cậu bé chăn cừu',
+                description: 'Câu chuyện về sự trung thực và hậu quả của việc nói dối',
+                content: `<p>There was once a shepherd boy who liked to play tricks. While watching his sheep, he would cry out, "Wolf! Wolf!" even when there was no wolf around.</p>
+                <p>The villagers would come running to help him, only to find that he was laughing at them.</p>
+                <p>This happened several times. Each time, the villagers became more and more angry.</p>
+                <p>Then one day, a real wolf came. The boy cried, "Wolf! Wolf!" but the villagers thought it was another trick.</p>
+                <p>No one came to help. The wolf attacked the flock, and many sheep were lost.</p>
+                <p><strong>Bài học:</strong> Không ai tin một người hay nói dối, ngay cả khi người đó nói thật.</p>`,
+                images: ['https://images.pexels.com/photos/248307/pexels-photo-248307.jpeg'],
+                createdAt: new Date()
+            },
+            {
+                title: 'The Ant and the Grasshopper - Kiến và Ve sầu',
+                description: 'Câu chuyện về tầm quan trọng của sự chuẩn bị và làm việc chăm chỉ',
+                content: `<p>During summer, an ant worked hard collecting food for winter, while a grasshopper spent his time singing and dancing.</p>
+                <p>"Why work so hard?" asked the grasshopper. "Come, sing and dance with me!"</p>
+                <p>"I'm preparing for winter," replied the ant. "You should do the same."</p>
+                <p>The grasshopper just laughed and continued playing.</p>
+                <p>When winter came, the ant was warm and well-fed in his home. The grasshopper, however, had no food or shelter.</p>
+                <p><strong>Bài học:</strong> Hãy chuẩn bị cho tương lai và đừng lãng phí thời gian khi có cơ hội.</p>`,
+                images: ['https://images.pexels.com/photos/1028741/pexels-photo-1028741.jpeg'],
+                createdAt: new Date()
+            },
+            {
+                title: 'The Little Red Riding Hood - Cô bé quàng khăn đỏ',
+                description: 'Câu chuyện cổ tích nổi tiếng về sự cảnh giác và vâng lời',
+                content: `<p>Once upon a time, there was a little girl who always wore a red riding hood. One day, she went to visit her sick grandmother.</p>
+                <p>Her mother warned her not to talk to strangers on the way.</p>
+                <p>In the forest, she met a wolf who asked where she was going. Forgetting her mother's warning, she told him.</p>
+                <p>The wolf ran ahead to grandmother's house, pretended to be Little Red Riding Hood, and got in.</p>
+                <p>When the real Little Red Riding Hood arrived, she found the wolf dressed as her grandmother.</p>
+                <p>Fortunately, a woodcutter heard her screams and saved both her and her grandmother.</p>
+                <p><strong>Bài học:</strong> Luôn nghe lời người lớn và cẩn thận với người lạ.</p>`,
+                images: ['https://images.pexels.com/photos/235621/pexels-photo-235621.jpeg'],
+                createdAt: new Date()
+            }
+        ];
+
+        const stories = await db.collection('stories').insertMany(storiesData);
+        console.log(`Đã tạo ${stories.insertedCount} câu chuyện`);
 
         console.log('Hoàn thành tạo dữ liệu mẫu!');
     } catch (error) {
